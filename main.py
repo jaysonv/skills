@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 import pdb
 import pandas as pd
-import pprint as pretty_print
 
 JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
               'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
@@ -31,41 +30,30 @@ other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net',
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
+INDEED_TITLE_XPATH = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
+INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
+
+
+
+
+
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
 
 job_data = pd.DataFrame(columns=KEY_WORDS)
-
+'''
 SITE_DICT = {
-    'indeed':
-        {
-            'url': 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch',
-            'job_element_selector': '//*[@id="sja{}"]/',
-            'paging_element_selector': '//*[@id="resultsCol"]/div[27]/a[{}]',
-            'paging_type': 'page'
 
-            # //*[@id="sja4"]
-            # //*[@id="sja10"]
-            },
     'career_builder':
         {
             'url': 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc',
-            'job_link_element_selector_type': None,
-            # /html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[2]/div[2]/div[1]/h2[2]/a
-            'job_element_selector': None,
-            'paging_element_selector': '/html/body/div[3]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]',
-            'paging_type': 'page',
-            },
+
     'dice':
         {
             'url': 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all={title}&for_exact=&for_none=&for_jt=&for_com=&for_loc=Santa+Clara%2C+CA&jtype=Full+Time&sort=relevance&limit=100&radius=50&jtype=Full+Time&limit=100&radius=50&jtype=Full+Time',
             'format_string': None,
             'job_link_element_selector_type': None,
-            '''
-    //*[@id="position0"]
-    //*[@id="position2"]
-    //*[@id="position0"]>> next page
-    '''
+
             'job_element_selector': None,
             'paging_element_selector': '/html/body/div[8]/div[3]/div[2]/div[1]/div[6]/div[2]/div/ul/li[{}]/a',
             'paging_type': 'page',
@@ -98,30 +86,52 @@ SITE_DICT = {
             'paging_element_selector': '//*[@id="ember975"]/li/ol/li[{}]/button',
             'paging_type': 'page',  # yes, page!
             },
-}
+'''
 
 
 class JobDescription(object):
 
-    def __init__(self):
-        self.url = ''
-        self.title = ''
+    def __init__(self, url):
+        self.url = url
         self.key_words_to_match = KEY_WORDS
         self.matched_key_words = set()
+        self.title = ''
+        self.should_discard = False
+        self.titles_to_match = JOB_TITLES
+
+    def get_job_description(self, url):
+        driver.get(url)
+        print('Getting job description for ' + self.title)
 
     def _parse_body_text(self):
+        print('Parsing job description for ' + self.title)
         body_text = driver.find_element_by_tag_name('body').text
         parsed_text = body_text.split()
         return parsed_text
 
-    def get_matched_key_words(self):
-        parsed_body = _parse_body_text()
+    def set_matched_key_words(self):
+        print('Matching keywords for ' + self.title)
+        parsed_body = self._parse_body_text()
         [self.matched_key_words.add(word) for word in parsed_body if
-         [True for w in self.key_words_to_match if word == w]]
+         [True for w in self.key_words_to_match if word.lower() == w.lower()]]
 
     def set_title(self, path):
-        element = driver.find_element_by_xpath(path)
-        self.title = element.text
+        try:
+            element = driver.find_element_by_xpath(path)
+            self.title = element.text
+        except NoSuchElementException:
+            print('FAILED TO SET TITLE NoSuchElementException')
+
+    def set_should_discard(self):
+        print('Should title {} get discarded?'.format(self.title))
+        match_list = self.titles_to_match
+        [match_list.pop(index) for index, match_title in enumerate(self.titles_to_match) if self.title != match_title]
+        if match_list:
+            self.should_discard = False
+            print('Do not discard ' + self.title)
+        else:
+            self.should_discard = True
+            print('Yes, discard ' + self.title)
 
 
 class JobSite(object):
@@ -129,8 +139,9 @@ class JobSite(object):
     def __init__(self,
                  url):
         self.url = url
-        self.discarded_titles = []
+        self.discarded_job_descriptions = set()
         self.job_descriptions = []
+
 
     def launch_main_page(self):
         driver.get(self.url)
@@ -150,8 +161,7 @@ class JobSite(object):
             print('Finding link elements')
             elements = driver.find_elements_by_tag_name(tag_name)
             print('Extracting links')
-            links += ([element.get_attribute('href') for element in elements])
-            print(links)
+            links += ([element.get_attribute('href') for element in elements if element.get_attribute('href') != None ])
             return links
         except NoSuchElementException:
             print('NoSuchElementException')
@@ -165,7 +175,6 @@ class JobSite(object):
             print('Extracting links')
             for element in elements:
                 links += element.get_attribute('href')
-            print(links)
             return links
         except NoSuchElementException:
             print('NoSuchElementException')
@@ -186,20 +195,42 @@ class JobSite(object):
         except NoSuchElementException:
             print('NoSuchElementException')
 
+    def discard_unmatched_job_descriptions(self):
+        self.discarded_job_descriptions += [self.job_descriptions.pop(index)for index, jd in enumerate(self.job_descriptions) if jd.should_discard]
+
 
 def go():
+    clean_links =[]
+
+    '''
+            INDEED
+    '''
     indeed = JobSite(
-                     #paging_element_selector='//*[@id="resultsCol"]/div[27]/a[{}]',
-                     url='https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
+                     url=INDEED_URL
                      )
     indeed.launch_main_page()
-    indeed.get_links_by_tag_name('a')
+    raw_links = indeed.get_links_by_tag_name('a')
+    clean_links += [link for link in raw_links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
+    indeed.job_descriptions += [JobDescription(link) for link in clean_links]
+    for job_description in indeed.job_descriptions:
+        job_description.get_job_description(job_description.url)
+        job_description.set_title(INDEED_TITLE_XPATH)
+        job_description.set_should_discard()
+        if job_description.should_discard:
+            indeed.discard_unmatched_job_descriptions()
+        else:
+            job_description.set_matched_key_words()
+
 
     career_builder = JobSite(
-        #job_element_selector='/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[2]/div[2]/div[1]/h2[{}]/a',
-        #paging_element_selector='/html/body/div[3]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]',
         url='https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc',
         )
+
+
+    stamp = datetime.now()
+    date_string = stamp.strftime('%Y-%d-%m-%H-%M-%S')
+    output_filename = 'output_{}.txt'.format(date_string)
+
 
 
 go()
