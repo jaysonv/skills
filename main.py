@@ -4,7 +4,6 @@ from selenium.common.exceptions import InvalidSessionIdException
 from selenium.common.exceptions import TimeoutException, InvalidArgumentException
 from selenium.webdriver.common.by import By
 from datetime import datetime
-import pdb
 import pandas as pd
 
 JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
@@ -14,9 +13,9 @@ JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Qua
               'software test engineer', 'software test automation', 'qa automation',
               'software quality assurance engineer']
 
-program_languages = ['job_title', 'bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
+program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
                      'php',
-                     'junit', 'selenium', 'React', 'c#']
+                     'junit', 'selenium', 'react', 'c#']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
@@ -26,7 +25,7 @@ databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'my
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
              'kubernetes', 'storage', 'network', 'networking']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium', 'testng']
+         'django', 'pytest', 'css', 'html', 'appium',]
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
@@ -34,13 +33,9 @@ INDEED_TITLE_XPATH = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
 
 
-
-
-
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
 
-job_data = pd.DataFrame(columns=KEY_WORDS)
 '''
 SITE_DICT = {
 
@@ -93,15 +88,19 @@ class JobDescription(object):
 
     def __init__(self, url):
         self.url = url
-        self.key_words_to_match = KEY_WORDS
-        self.matched_key_words = set()
         self.title = ''
         self.should_discard = False
-        self.titles_to_match = JOB_TITLES
+        self.per_title_match_dict = {}
+
+    def __str__(self):
+        print_string = '==================================\n'
+        print_string += 'Job Title {job_title}\n'
+        for key, value in self.per_title_match_dict.items():
+            print_string += '{key} : {value}, '.format(job_title = self.title, key = key, value = value)
 
     def get_job_description(self, url):
         driver.get(url)
-        print('Getting job description for ' + self.title)
+        print('Getting job description')
 
     def _parse_body_text(self):
         print('Parsing job description for ' + self.title)
@@ -109,29 +108,35 @@ class JobDescription(object):
         parsed_text = body_text.split()
         return parsed_text
 
-    def set_matched_key_words(self):
-        print('Matching keywords for ' + self.title)
+    def match_keywords(self):
+        keydict = {}
+        for key in KEY_WORDS:
+            keydict[key] = 0
         parsed_body = self._parse_body_text()
-        [self.matched_key_words.add(word) for word in parsed_body if
-         [True for w in self.key_words_to_match if word.lower() == w.lower()]]
+        print('Matching keywords for ' + self.title)
+        for word in parsed_body:
+            for key in KEY_WORDS:
+                if word == key:
+                    keydict[key] = 1
+        self.per_title_match_dict[self.title] = keydict
 
     def set_title(self, path):
         try:
             element = driver.find_element_by_xpath(path)
             self.title = element.text
+            print('Setting matching title ' + self.title)
         except NoSuchElementException:
             print('FAILED TO SET TITLE NoSuchElementException')
 
     def set_should_discard(self):
         print('Should title {} get discarded?'.format(self.title))
-        match_list = self.titles_to_match
-        [match_list.pop(index) for index, match_title in enumerate(self.titles_to_match) if self.title != match_title]
-        if match_list:
-            self.should_discard = False
-            print('Do not discard ' + self.title)
-        else:
+        set_of_title = set(self.title)
+        set_of_matching = set(JOB_TITLES)
+        match = bool(set_of_matching.intersection(set_of_title))
+        print(match)
+        if match != False:
+            print('Yes discard ' + self.title)
             self.should_discard = True
-            print('Yes, discard ' + self.title)
 
 
 class JobSite(object):
@@ -142,7 +147,6 @@ class JobSite(object):
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
 
-
     def launch_main_page(self):
         driver.get(self.url)
 
@@ -152,6 +156,7 @@ class JobSite(object):
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
             else:
                 driver.find_element_by_xpath(self.paging_element_selector).click()
+            print('Paging / clicking "Load More.."')
         except NoSuchElementException:
             print('NoSuchElementException')
 
@@ -165,7 +170,6 @@ class JobSite(object):
             return links
         except NoSuchElementException:
             print('NoSuchElementException')
-
 
     def get_links_by_class(self, class_name):
         try:
@@ -182,7 +186,6 @@ class JobSite(object):
     def get_links_by_xpath(self, path, index=None):
         try:
             if index:
-                print('Index True')
                 elements = driver.find_element_by_xpath(path.format(index))
                 print('Found elements by xpath ' + path + ' at index ' + str(index))
 
@@ -196,12 +199,12 @@ class JobSite(object):
             print('NoSuchElementException')
 
     def discard_unmatched_job_descriptions(self):
-        self.discarded_job_descriptions += [self.job_descriptions.pop(index)for index, jd in enumerate(self.job_descriptions) if jd.should_discard]
+        for index, jd in enumerate(self.job_descriptions):
+            if jd.should_discard:
+                self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
 
 
 def go():
-    clean_links =[]
-
     '''
             INDEED
     '''
@@ -210,6 +213,7 @@ def go():
                      )
     indeed.launch_main_page()
     raw_links = indeed.get_links_by_tag_name('a')
+    clean_links = []
     clean_links += [link for link in raw_links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
     indeed.job_descriptions += [JobDescription(link) for link in clean_links]
     for job_description in indeed.job_descriptions:
@@ -219,12 +223,17 @@ def go():
         if job_description.should_discard:
             indeed.discard_unmatched_job_descriptions()
         else:
-            job_description.set_matched_key_words()
+            job_description.match_keywords()
+    for jd in indeed.job_descriptions:
+        print('=====================================')
+        print(jd.title)
+        #self.per_title_match_dict
+        matched = jd.per_title_match_dict[jd.title]
+        for key, value in matched.items():
+            print(key + ' : ' + str(value   ))
 
 
-    career_builder = JobSite(
-        url='https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc',
-        )
+
 
 
     stamp = datetime.now()
