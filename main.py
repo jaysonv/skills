@@ -5,7 +5,7 @@ from selenium.common.exceptions import TimeoutException, InvalidArgumentExceptio
 from selenium.webdriver.common.by import By
 from datetime import datetime
 import logging
-logging.basicConfig(filename='jobEXECUTION.log',level=logging.DEBUG)
+logging.basicConfig(filename='jobEXECUTION.logging',level=logging.DEBUG)
 
 JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
               'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
@@ -120,32 +120,33 @@ class JobDescription(object):
         print('Matching keywords for ' + self.title)
         for word in parsed_body:
             for key in KEY_WORDS:
-                logging.debug('Checking body word {word} == {keyword}'.format(word, key))
                 if word == key:
-                    logging.debug('Found match {word} = {keyword}'.format(word, key))
+                    logging.debug('Found match {word} = {keyword}'.format(word = word, keyword = key))
                     keydict[key] = 1
+                else:
+                    logging.debug('Did not find match {word} = {keyword}'.format(word = word, keyword = key))
         self.per_title_match_dict[self.title] = keydict
 
     def set_title(self, path):
         try:
             element = driver.find_element_by_xpath(path)
             self.title = element.text
-            log.debug('Seting title ' + self.title)
+            logging.debug('Seting title ' + self.title)
             print('Seting title ' + self.title)
         except NoSuchElementException:
-            log.warning('FAILED TO SET TITLE NoSuchElementException')
+            logging.warning('FAILED TO SET TITLE NoSuchElementException')
             print('FAILED TO SET TITLE NoSuchElementException')
 
     def set_should_discard(self):
         print('Discarding bad job descriptions')
-        log.debug('Should title {} get discarded?'.format(self.title))
         set_of_title = set(self.title)
         set_of_matching = set(JOB_TITLES)
         match = bool(set_of_matching.intersection(set_of_title))
-        print(match)
         if match != False:
-            log.debug('Yes discard ' + self.title)
+            logging.debug('Discarding ' + self.title)
             self.should_discard = True
+        else:
+            logging.debug('Did not discard ' + self.title)
 
 
 class JobSite(object):
@@ -164,10 +165,10 @@ class JobSite(object):
         try:
             if index >= 1:
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
-                log.debug('Page by clicking ' + self.paging_element_selector.format(index))
+                logging.debug('Page by clicking ' + self.paging_element_selector.format(index))
             else:
                 driver.find_element_by_xpath(self.paging_element_selector).click()
-                log.debug('Page by clicking ' + self.paging_element_selector)
+                logging.debug('Page by clicking ' + self.paging_element_selector)
             print('Paging / clicking "Load More.."')
         except NoSuchElementException:
             print('NoSuchElementException - which might be expected')
@@ -180,7 +181,7 @@ class JobSite(object):
             elements = driver.find_elements_by_tag_name(tag_name)
             print('Extracting links')
             links += ([element.get_attribute('href') for element in elements if element.get_attribute('href') != None ])
-            logging.debug('Returning links: ' + [link + ', ' for link in links])
+            logging.debug('Links found : ' + str(links))
             return links
         except NoSuchElementException:
             logging.warning('NoSuchElementException finding job description links')
@@ -223,13 +224,13 @@ class JobSite(object):
             if jd.should_discard:
                 logging.info('Adding {title} to discard list'.format(title = jd.title))
                 self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
+        logging.debug('discard_unmatched_job_descriptions added these job descriptions : \n' + [jd.title + ', ' for jd in self.discarded_job_descriptions] )
 
-    def clean(self):
+    def clean(self, links):
         logging.info('Cleaning links')
-        raw_links = self.get_links_by_tag_name('a')
         clean_links = []
-        clean_links += [link for link in raw_links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
-        log.debug('Resulting clean links : ' + [(link + ', ') for link in clean_links])
+        clean_links += [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
+        logging.debug('Clean links : ' + str(clean_links))
         self.job_descriptions += [JobDescription(link) for link in clean_links]
 
 
@@ -261,7 +262,7 @@ def go():
                      )
     indeed.launch_main_page()
     logging.info('Launching indeed')
-
+    indeed.clean(indeed.get_links_by_tag_name('a'))
     for page in range(0,6):
         if page >=1:
             indeed.page(page)
