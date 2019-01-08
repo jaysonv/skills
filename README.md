@@ -1,5 +1,5 @@
 # Job Skill Reporter
-Scrapes Job Websites to help determine skill demand
+Scrapes Job Websites to help determine skill demand.
 This is a personal project that I'd like to morph into something useful for the general public.
 
 ## Goals:
