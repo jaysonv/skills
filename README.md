@@ -1,8 +1,8 @@
-# skills
+# Job Skill Reporter
 Scrapes Job Websites to help determine skill demand
 This is a personal project that I'd like to morph into something useful for the general public.
 
-h2 Goals:
+## Goals:
 * User able to input job title
 * User able to input job skill key words related to job title
 * A report is produced that displays a summary of the skills most in demand.  This can be filtered: 
@@ -11,7 +11,7 @@ h2 Goals:
 ** User able to specify JD hours style (part time, full time, contract, internship)
 ** User able to specify JD posted within a certain number of days (desire newer JD)
 
-h2 Design
+## Design
 * ATM there is a ton of stuff that is hard coded and needs to be generic
 * There is no interface, but there should be at least command line
 * The set of Job Titles is hard coded, but should be something entered by user
