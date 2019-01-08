@@ -29,13 +29,19 @@ other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net',
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
-INDEED_TITLE_XPATH = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
+INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
 INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
+INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
+INDEED_JOB_LINK_SELECTOR = None
+
 
 CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
-CAREER_BUILDER_TITLE_XPATH = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/h2[{}]/a'
+CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = None  # TODO: NEEDS A SELECTOR
 CAREER_BUILDER_PAGING_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]'
+CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
+CAREER_BUILDER_JOB_LINK_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/h2[{}]/a'
+
 
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
@@ -45,24 +51,8 @@ def make_date_string():
     date_string = stamp.strftime('%Y-%d-%m-%H-%M-%S')
     return date_string
 
-logging.basicConfig(filename='jobEXECUTION_{date}.log'.format(date = make_date_string()), level=logging.INFO)
+logging.basicConfig(filename='execution_{date}.log'.format(date = make_date_string()), level=logging.INFO)
 
-def file_results(job_site):
-        output_filename = 'job_output_{date}.txt'.format(date = make_date_string())
-        with open(output_filename, 'a') as file:
-            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(job_site.discarded_job_descriptions)))
-            write_string = ''
-            for jd in job_site.discarded_job_descriptions:
-                write_string += jd.title + '\n'
-            write_string += '\n----------------------------------------------\n'
-            write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(job_site.job_descriptions))
-            write_string += '\n----------------------------------------------\n'
-            for job in job_site.job_descriptions:
-                write_string += job.title.uppger() + '\n'
-                write_string += '===============================\n'
-                for key, value in job.per_title_match_dict[job.title].items():
-                    write_string += '{key}:{value}, '.format(key=key, value = value)
-            file.write(write_string)
 
 '''
 SITE_DICT = {
@@ -111,11 +101,12 @@ SITE_DICT = {
 
 class JobDescription(object):
 
-    def __init__(self, url):
+    def __init__(self, url, title_selector = None):
         self.url = url
         self.title = ''
         self.should_discard = False
         self.per_title_match_dict = {}
+        self.title_selector = title_selector
 
     def __str__(self):
         print_string = '==================================\n'
@@ -123,9 +114,9 @@ class JobDescription(object):
         for key, value in self.per_title_match_dict.items():
             print_string += '{key} : {value}, '.format(job_title = self.title, key = key, value = value)
 
-    def get_job_description(self, url):
-        driver.get(url)
-        logging.info('MAIN - Getting job description at ' + str(url))
+    def get_job_description(self):
+        driver.get(self.url)
+        logging.info('MAIN - Getting job description at ' + str(self.url))
         print('Getting job description')
 
     def _parse_body_text(self):
@@ -151,9 +142,9 @@ class JobDescription(object):
                     logging.debug('MAIN - Did not find match {word} = {keyword}'.format(word = word, keyword = key))
         self.per_title_match_dict[self.title] = keydict
 
-    def set_title(self, path):
+    def set_title(self):
         try:
-            element = driver.find_element_by_xpath(path)
+            element = driver.find_element_by_xpath(self.title_selector)
             self.title = element.text
             logging.info('MAIN - Setting title ' + self.title)
             print('Seting title ' + self.title)
@@ -162,7 +153,7 @@ class JobDescription(object):
             print('FAILED TO SET TITLE NoSuchElementException')
 
     def set_should_discard(self):
-        print('Discarding bad job descriptions')
+        print('MAIN - SDiscarding bad job descriptions')
         set_of_title = set()
         set_of_title.add(self.title.lower())
         set_of_matching = set()
@@ -174,20 +165,21 @@ class JobDescription(object):
             logging.info('MAIN - Discarding ' + self.title)
             self.should_discard = True
 
-
 class JobSite(object):
 
     def __init__(self,
-                 url, paging_element_selector):
+                 url, paging_element_selector, job_link_selector_type, job_link_selector = None, job_descriptions_title_selector):
         self.url = url
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
         self.paging_element_selector = paging_element_selector
+        self.job_link_selector_type = job_link_selector_type
+
 
     def launch_main_page(self):
         driver.get(self.url)
 
-    def page(self, index=None):
+    def page(self, index = 1):
         try:
             if index >= 1:
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
@@ -199,12 +191,12 @@ class JobSite(object):
         except NoSuchElementException:
             print('NoSuchElementException - which might be expected')
 
-    def get_links_by_tag_name(self, tag_name):
+    def get_links_by_tag_a(self):
         try:
             links = []
             logging.info('MAIN - Finding link elements')
             print('Finding link elements')
-            elements = driver.find_elements_by_tag_name(tag_name)
+            elements = driver.find_elements_by_tag_name('a')
             print('Extracting links')
             links += ([element.get_attribute('href') for element in elements if element.get_attribute('href') != None ])
             logging.debug('MAIN - Links found : ' + str(links))
@@ -213,37 +205,35 @@ class JobSite(object):
             logging.warning('MAIN - NoSuchElementException finding job description links')
             print('NoSuchElementException')
 
-    def get_links_by_class(self, class_name):
-        try:
-            links = []
-            print('Finding link elements')
-            elements = driver.find_elements_by_class_name(class_name)
-            print('Extracting links')
-            for element in elements:
-                links += element.get_attribute('href')
-            logging.info('MAIN - Returning links: ' + [link + ', ' for link in links])
-            return links
-        except NoSuchElementException:
-            print('NoSuchElementException')
+    def get_links_by_class(self):
+        pass
+        # try:
+        #     links = []
+        #     print('Finding link elements')
+        #     elements = driver.find_elements_by_class_name(class_name)
+        #     print('Extracting links')
+        #     for element in elements:
+        #         links += element.get_attribute('href')
+        #     logging.info('MAIN - Returning links: ' + [link + ', ' for link in links])
+        #     return links
+        # except NoSuchElementException:
+        #     print('NoSuchElementException')
 
-    def get_links_by_xpath(self, path, index=None):
-        try:
-            if index:
-                elements = driver.find_element_by_xpath(path.format(index))
-                logging.info('MAIN - Found elements by xpath ' + path + ' at index ' + str(index))
-                print('Found elements by xpath ' + path + ' at index ' + str(index))
+    def get_links_by_xpath(self):
+        for index in range(0,500):
+            try:
+                elements = driver.find_element_by_xpath(self.job_link_selector.format(index))
+                logging.info('Found elements by xpath: ' +  self.job_link_selector + '({})'.format(str(index)))
+                print('Found elements by xpath: ' +  self.job_link_selector + '({})'.format(str(index)))
+                links = []
+                links += [element.get_attribute('href') for element in elements]
 
-            else:
-                elements = driver.find_element_by_xpath(path)
-                logging.info('MAIN - Found elements by xpath ' + path)
-                print('Found elements by xpath ' + path)
-            links = []
-            links += [element.get_attribute('href') for element in elements]
-            logging.info('MAIN - Returning links: ' + [link + ', ' for link in links])
-            return links
-        except NoSuchElementException:
-            logging.warning('MAIN - NoSuchElementException getting element by xpath ' + path)
-            print('NoSuchElementException')
+            except NoSuchElementException:
+                logging.warning('MAIN - NoSuchElementException getting element by xpath: ' + self.job_link_selector + '({})'.format(str(index)))
+                print('NoSuchElementException')
+                logging.info('MAIN - Returning links: ' + [link + ', ' for link in links])
+                return links
+        return links
 
     def discard_unmatched_job_descriptions(self):
         for index, jd in enumerate(self.job_descriptions):
@@ -259,36 +249,78 @@ class JobSite(object):
         logging.debug('MAIN - Clean links : ' + str(clean_links))
         self.job_descriptions += [JobDescription(link) for link in clean_links]
 
+    def set_job_descriptions_title_selector(self):
+
+
+    def file_results(self):
+            output_filename = 'job_output.txt'
+            with open(output_filename, 'a') as file:
+                file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
+                write_string = ''
+                for jd in self.discarded_job_descriptions:
+                    write_string += jd.title + '\n'
+                write_string += '\n----------------------------------------------\n'
+                write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(self.job_descriptions))
+                write_string += '\n----------------------------------------------\n'
+                for job in self.job_descriptions:
+                    write_string += job.title.uppger() + '\n'
+                    write_string += '===============================\n'
+                    for key, value in job.per_title_match_dict[job.title].items():
+                        write_string += '{key}:{value}, '.format(key=key, value = value)
+                print(write_string)
+                print('Writing results to file')
+                file.write(write_string)
+
+
+    def process_site(self):
+        self.launch_main_page()
+        if self.job_link_selector_type == 'tag':
+            logging.info('Getting links by tag')
+            self.clean(self.get_links_by_tag_a())
+        elif self.job_link_selector_type == 'xpath':
+            logging.info('Getting links by xpath')
+            self.clean(self.get_links_by_xpath())
+        elif self.job_link_selector_type == 'class':
+            self.clean(self.get_links_by_class())
+
+        for page in range(0,6):
+            if page >=1:
+                self.page(page)
+            for job_description in self.job_descriptions:
+                job_description.get_job_description(job_description.url)
+                job_description.set_title()
+                job_description.set_should_discard()
+                if job_description.should_discard:
+                    self.discard_unmatched_job_descriptions()
+                else:
+                    job_description.match_keywords()
+        self.file_results()
+
 
 def go():
-    '''
-            INDEED
-    '''
+    logging.info('MAIN - PROCESSING INDEED')
+    print('PROCESSING INDEED')
     indeed = JobSite(
                      url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR
+                     paging_element_selector = INDEED_PAGING_SELECTOR,
+                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
                      )
-    indeed.launch_main_page()
-    logging.info('Launching indeed')
-    indeed.clean(indeed.get_links_by_tag_name('a'))
-    for page in range(0,6):
-        if page >=1:
-            indeed.page(page)
-        for job_description in indeed.job_descriptions:
-            job_description.get_job_description(job_description.url)
-            job_description.set_title(INDEED_TITLE_XPATH)
-            job_description.set_should_discard()
-            if job_description.should_discard:
-                indeed.discard_unmatched_job_descriptions()
-            else:
-                job_description.match_keywords()
-    file_results(indeed)
+    indeed.process_site()
 
-    '''
-
-    '''
+    logging.info('MAIN - PROCESSING CAREER BUILDER')
+    print('PROCESSING CAREER BUILDER')
+    careerbuilder = JobSite(
+                            url = CAREER_BUILDER_URL,
+                            paging_element_selector = CAREER_BUILDER_PAGING_SELECTOR,
+                            job_link_selector_type = CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
+                            job_descriptions_title_selector =
+                            )
+    careerbuilder.process_site()
+    print('Finished')
 
 '''
 MAIN
 '''
 go()
+driver.close()
