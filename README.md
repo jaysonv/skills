@@ -17,5 +17,6 @@ This is a personal project that I'd like to morph into something useful for the 
 * The set of Job Titles is hard coded, but should be something entered by user
 * The mechanism for matching Job Titles is brittle and only matches exact titles
 ** Should be more flexable, perhaps using RegEx or ML
+
 ** Must not use something like for job_title_specified in job_title_found.  'in' is far too generic and will return too many bad matches
 
