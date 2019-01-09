@@ -1,5 +1,5 @@
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from selenium.common.exceptions import InvalidSessionIdException
 from selenium.common.exceptions import TimeoutException, InvalidArgumentException
 from selenium.webdriver.common.by import By
@@ -11,11 +11,11 @@ JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Qua
               'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
               'software development engineer in test',
               'software test engineer', 'software test automation', 'qa automation',
-              'software quality assurance engineer']
+              'software quality assurance engineer', 'QA Automation Engineer']
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
                      'php',
-                     'junit', 'selenium', 'react', 'c#']
+                     'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
@@ -40,8 +40,7 @@ CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assura
 CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = '//*[@id="main-content"]/div[10]/div[3]/div[1]/div/div[1]/h1'
 CAREER_BUILDER_PAGING_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]'
 CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
-CAREER_BUILDER_JOB_LINK_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/h2[{}]/a'
-# this is also a possible selector //*[@id="job-title"]
+CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
 
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
@@ -194,7 +193,8 @@ class JobSite(object):
     def launch_main_page(self):
         driver.get(self.url)
 
-    def page(self, index = 1):
+    def page(self, index):
+        logging.info('Paging index is ' +str(index))
         try:
             if index >= 1:
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
@@ -205,6 +205,9 @@ class JobSite(object):
             print('Paging / clicking "Load More.."')
         except NoSuchElementException:
             print('NoSuchElementException - which might be expected')
+            logging.warning('NoSuchElementException - which might be expected')
+        except ElementClickInterceptedException:
+            logging.warning('ElementClickInterceptedException for index ' + str(index))
 
     def get_links_by_tag_a(self):
         try:
@@ -221,19 +224,19 @@ class JobSite(object):
             print('NoSuchElementException')
 
     def get_links_by_xpath(self):
-        for index in range(0,500):
+        links = []
+        for index in range(0, 1001):
             try:
-                elements = driver.find_element_by_xpath(self.job_link_selector.format(index))
-                logging.info('Found elements by xpath: ' +  self.job_link_selector + '({})'.format(str(index)))
-                print('Found elements by xpath: ' +  self.job_link_selector + '({})'.format(str(index)))
-                links = []
+                elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
+                logging.info('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
                 links += [element.get_attribute('href') for element in elements]
-
             except NoSuchElementException:
-                logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector + '({})'.format(str(index)))
+                logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
                 print('NoSuchElementException')
-                logging.info('Returning links: ' + [link + ', ' for link in links])
-                return links
+        if links:
+            logging.info('Returning links: ' + str(links))
+        else:
+            logging.info('No links found')
         return links
 
     def discard_unmatched_job_descriptions(self):
@@ -289,6 +292,8 @@ class JobSite(object):
                 self.clean(self.get_links_by_xpath())
             elif self.job_link_selector_type == 'class':
                 self.clean(self.get_links_by_class())
+            else:
+                logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type ) )
 
             for job_description in self.job_descriptions:
                 job_description.get_job_description()
