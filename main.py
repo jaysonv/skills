@@ -197,7 +197,7 @@ class JobSite(object):
     def discard_unmatched_job_descriptions(self):
         return
         # TODO
-        for index, jd in enumerate(self.job_descriptions):
+        #for index, jd in enumerate(self.job_descriptions):
             #if jd.should_discard:
                 #logging.info('Adding {title} to discard list'.format(title=jd.title))
                 #self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
@@ -218,11 +218,10 @@ class JobSite(object):
             write_string += '-----------------------------\n' \
                             'MATCHING JOB TITLES (TOTAL {}):\n'.format(len(self.job_descriptions))
             for job in self.job_descriptions:
-                if job.title:
-                    write_string += '\n{job_title}\n' \
-                                    '===============================\n'.format(job_title=job.title.upper())
-                    for key, value in job.per_title_match_dict[job.title].items():
-                        write_string += '{key}:{value}, '.format(key=key, value=value)
+                write_string += '\n{job_title}\n' \
+                                '===============================\n'.format(job_title=job.title.upper())
+                for key, value in job.keyword_matches.items():
+                    write_string += '{key}:{value}, '.format(key=key, value=value)
 
             print(write_string)
             print('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
