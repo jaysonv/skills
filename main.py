@@ -25,7 +25,7 @@ databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'my
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
              'kubernetes', 'storage', 'network', 'networking']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium',]
+         'django', 'pytest', 'css', 'html', 'appium']
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
@@ -50,7 +50,7 @@ def make_date_string():
     date_string = stamp.strftime('%Y-%d-%m-%H-%M-%S')
     return date_string
 
-logging.basicConfig(filename='execution_{date}.log'.format(date = make_date_string()), level=logging.INFO)
+logging.basicConfig(filename='execution_{date}.log'.format(date=make_date_string()), level=logging.INFO)
 
 '''
 SITE_DICT = {
@@ -98,7 +98,7 @@ SITE_DICT = {
 
 class JobDescription(object):
 
-    def __init__(self, url, title_selector = None):
+    def __init__(self, url, title_selector=None):
         self.url = url
         self.title = ''
         self.should_discard = False
@@ -109,7 +109,7 @@ class JobDescription(object):
         print_string = '==================================\n'
         print_string += 'Job Title {job_title}\n'
         for key, value in self.per_title_match_dict.items():
-            print_string += '{key} : {value}, '.format(job_title = self.title, key = key, value = value)
+            print_string += '{key} : {value}, '.format(job_title=self.title, key=key, value=value)
 
     def get_job_description(self):
         driver.get(self.url)
@@ -126,7 +126,6 @@ class JobDescription(object):
         else:
             logging.warning('No title found')
 
-
     def match_keywords(self):
         keydict = {}
         for key in KEY_WORDS:
@@ -137,10 +136,10 @@ class JobDescription(object):
         for word in parsed_body:
             for key in KEY_WORDS:
                 if word == key:
-                    logging.info('Found match {word} = {keyword}'.format(word = word, keyword = key))
+                    logging.info('Found match {word} = {keyword}'.format(word=word, keyword=key))
                     keydict[key] = 1
                 else:
-                    logging.debug('Did not find match {word} = {keyword}'.format(word = word, keyword = key))
+                    logging.debug('Did not find match {word} = {keyword}'.format(word=word, keyword=key))
         if self.title:
             self.per_title_match_dict[self.title] = keydict
         else:
@@ -194,7 +193,7 @@ class JobSite(object):
         driver.get(self.url)
 
     def page(self, index):
-        logging.info('Paging index is ' +str(index))
+        logging.info('Paging index is ' + str(index))
         try:
             if index >= 1:
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
@@ -228,7 +227,7 @@ class JobSite(object):
         for index in range(0, 1001):
             try:
                 elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
-                logging.info('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
+                logging.info('Found elements by xpath: ' + self.job_link_selector.format(str(index)))
                 links += [element.get_attribute('href') for element in elements]
             except NoSuchElementException:
                 logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
@@ -242,7 +241,7 @@ class JobSite(object):
     def discard_unmatched_job_descriptions(self):
         for index, jd in enumerate(self.job_descriptions):
             if jd.should_discard:
-                logging.info('Adding {title} to discard list'.format(title = jd.title))
+                logging.info('Adding {title} to discard list'.format(title=jd.title))
                 self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
 
     def clean(self, links):
@@ -268,7 +267,7 @@ class JobSite(object):
                     if job.title != '' and job.title:
                         for key, value in job.per_title_match_dict[job.title].items():
                             try:
-                                write_string += '{key}:{value}, '.format(key=key, value = value)
+                                write_string += '{key}:{value}, '.format(key=key, value=value)
                             except KeyError:
                                 logging.warning('KeyError key = ' + key)
                                 write_string += 'KeyError key = ' + key
@@ -293,7 +292,7 @@ class JobSite(object):
             elif self.job_link_selector_type == 'class':
                 self.clean(self.get_links_by_class())
             else:
-                logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type ) )
+                logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
 
             for job_description in self.job_descriptions:
                 job_description.get_job_description()
@@ -326,21 +325,21 @@ def go():
     print('PROCESSING INDEED')
     indeed = JobSite(
                      url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR,
-                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+                     paging_element_selector=INDEED_PAGING_SELECTOR,
+                     job_link_selector_type=INDEED_JOB_LINK_SELECTOR_TYPE,
+                     job_link_selector=INDEED_JOB_LINK_SELECTOR,
+                     job_descriptions_title_selector=INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
                      )
     indeed.process_site()
 
     logging.info('PROCESSING CAREER BUILDER')
     print('PROCESSING CAREER BUILDER')
     careerbuilder = JobSite(
-                            url = CAREER_BUILDER_URL,
-                            paging_element_selector = CAREER_BUILDER_PAGING_SELECTOR,
-                            job_link_selector_type = CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
-                            job_link_selector = CAREER_BUILDER_JOB_LINK_SELECTOR,
-                            job_descriptions_title_selector = CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
+                            url=CAREER_BUILDER_URL,
+                            paging_element_selector=CAREER_BUILDER_PAGING_SELECTOR,
+                            job_link_selector_type=CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
+                            job_link_selector=CAREER_BUILDER_JOB_LINK_SELECTOR,
+                            job_descriptions_title_selector=CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
                             )
     careerbuilder.process_site()
     print('Finished')
