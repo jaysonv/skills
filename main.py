@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from datetime import datetime
@@ -99,71 +99,40 @@ SITE_DICT = {
 
 class JobDescription(object):
 
-    def __init__(self, url, title_selector):
+    def __init__(self, url, title, description=None, keyword_matches=None):
         self.url = url
-        self.title = self._get_title(title_selector)
-        self.should_discard = False
-        self.per_title_match_dict = {}
+        self.title = title
+        self.description = description
+        self.keyword_matches = keyword_matches
 
     def __str__(self):
-        print_string = '==================================\n'
-        print_string += 'Job Title {job_title}\n'
-        for key, value in self.per_title_match_dict.items():
-            print_string += '{key} : {value}, '.format(job_title=self.title, key=key, value=value)
+        # TODO
+        pass
 
-    def get_job_description(self):
-        driver.get(self.url)
-        logging.info('Getting job description at ' + str(self.url))
-        print('Getting job description')
+    @classmethod
+    def from_url(cls, url, selenium_driver, title_selector):
+        logging.info('Creating {cls} from url: {url}, driver: {driver}, title_selector:{title_selector}'.format(
+            cls=cls.__name__, url=url, driver=selenium_driver, title_selector=title_selector))
 
-    def _parse_body_text(self):
-        if self.title:
-            logging.info('Parsing job description for ' + self.title)
-            print('Parsing job description for ' + self.title)
-            body_text = driver.find_element_by_tag_name('body').text
-            parsed_text = body_text.split()
-            return parsed_text
-        else:
-            logging.warning('No title found')
-
-    def match_keywords(self):
-        keydict = defaultdict(int)
-        parsed_body = self._parse_body_text()
-        logging.info('Matching keywords for ' + self.title)
-        for word in parsed_body:
-            if word in KEY_WORDS:
-                keydict[word] += 1
-        if self.title:
-            self.per_title_match_dict[self.title] = keydict
-        else:
-            logging.warning('No title found')
-
-    def _get_title(self, title_selector):
         try:
-            element_text = driver.find_element_by_xpath(title_selector).text
-            if element_text:
-                return element_text
-            else:
-                raise NoSuchElementException(
-                    "Failed to find title with selector: {selector}".format(title_selector))
-        except NoSuchElementException as e:
-            logging.exception(exception=e)
+            logging.info('Getting job post at: {url}'.format(url=url))
+            driver.get(url)
 
-    def set_should_discard(self):
-        print('Discarding bad job descriptions')
-        set_of_title = set()
-        if self.title:
-            set_of_title.add(self.title.lower())
-        else:
-            self.should_discard = True
-        set_of_matching = set()
-        [set_of_matching.add(title.lower()) for title in JOB_TITLES]
-        match = bool(set_of_matching.intersection(set_of_title))
-        if match:
-            logging.info('Did not discard ' + self.title)
-        else:
-            logging.info('Discarding ' + self.title)
-            self.should_discard = True
+            title = selenium_driver.find_element_by_xpath(title_selector).text
+            logging.info('Title is: {title}'.format(title=title))
+
+            description = selenium_driver.find_element_by_tag_name('body').text
+            logging.info('Description is: {description}'.format(description=description))
+
+            description_counts = Counter(description.split())
+            matching_keywords = {word: count for word, count in description_counts.items() if word in KEY_WORDS}
+            logging.info('Matching keywords are: {matching_keywords}'.format(matching_keywords=matching_keywords))
+            return cls(url=url, title=title, keyword_matches=matching_keywords)
+        except Exception as exc:
+            print(f'exception: {exc}')
+            logging.exception(msg=exc)
+        return None
+
 
 class JobSite(object):
 
@@ -236,7 +205,7 @@ class JobSite(object):
         logging.info('Cleaning links')
         clean_links = [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
         logging.debug('Clean links : ' + str(clean_links))
-        self.job_descriptions += [JobDescription(link) for link in clean_links]
+        self.job_descriptions += [JobDescription.from_url(link, driver, self.job_descriptions_title_selector) for link in clean_links]
 
     def file_results(self):
         with open(JOB_OUTPUT_FILENAME, 'a') as file:
@@ -330,3 +299,4 @@ def go():
 if __name__ == '__main__':
     go()
     driver.close()
+
