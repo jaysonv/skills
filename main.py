@@ -1,3 +1,4 @@
+from collections import defaultdict
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from datetime import datetime
@@ -127,9 +128,7 @@ class JobDescription(object):
             logging.warning('No title found')
 
     def match_keywords(self):
-        keydict = {}
-        for key in KEY_WORDS:
-            keydict[key] = 0
+        keydict = defaultdict(int)
         parsed_body = self._parse_body_text()
         logging.info('Matching keywords for ' + self.title)
         print('Matching keywords for ' + self.title)
