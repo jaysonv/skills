@@ -103,10 +103,18 @@ class JobDescription(object):
         self.url = url
         self.title = title
         self.description = description
-        self.keyword_matches = keyword_matches
+        self._keyword_matches = keyword_matches
 
     def __str__(self):
         return self.title
+
+    def hasNoMatches(self):
+        return bool(self._keyword_matches)
+
+    @property
+    def keyword_matches(self):
+        return 'Keyword matches: ' \
+               ', '.join('{k}: {v}'.format(k=word, v=count) for word, count in self._keyword_matches.items())
 
     @classmethod
     def from_url(cls, url, selenium_driver, title_selector):
@@ -123,9 +131,9 @@ class JobDescription(object):
             description = selenium_driver.find_element_by_tag_name('body').text
             logging.info('Description is: {description}'.format(description=description))
 
-            description_counts = Counter(description.split())
-            matching_keywords = {word: count for word, count in description_counts.items() if word in KEY_WORDS}
-            logging.info('Matching keywords are: {matching_keywords}'.format(matching_keywords=matching_keywords))
+            word_counts = Counter(description.split())
+            matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
+            logging.info('Matching keywords are: {}'.format(matching_keywords))
             return cls(url=url, title=title, keyword_matches=matching_keywords)
         except Exception as exc:
             print(f'exception: {exc}')
@@ -195,12 +203,11 @@ class JobSite(object):
         return links
 
     def discard_unmatched_job_descriptions(self):
-        return
-        # TODO
-        #for index, jd in enumerate(self.job_descriptions):
-            #if jd.should_discard:
-                #logging.info('Adding {title} to discard list'.format(title=jd.title))
-                #self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
+        for job in self.job_descriptions:
+            if job is None or job.hasNoMatches():
+                logging.info('Adding {title} to discard list'.format(title=job))
+                self.discarded_job_descriptions.add(job)
+        self.job_descriptions = list(set(self.job_descriptions) ^ self.discarded_job_descriptions)
 
     def clean(self, links):
         logging.info('Cleaning links')
@@ -212,16 +219,13 @@ class JobSite(object):
         with open(JOB_OUTPUT_FILENAME, 'a') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}):\n'.format(len(self.discarded_job_descriptions)))
             write_string = ''
-            # TODO, simplify this with JobDescription changes
-            #for jd in self.discarded_job_descriptions:
-                #write_string += jd.title + '\n'
+            write_string = '\n'.join(map(str, self.discarded_job_descriptions))
             write_string += '-----------------------------\n' \
                             'MATCHING JOB TITLES (TOTAL {}):\n'.format(len(self.job_descriptions))
             for job in self.job_descriptions:
-                write_string += '\n{job_title}\n' \
-                                '===============================\n'.format(job_title=job.title.upper())
-                for key, value in job.keyword_matches.items():
-                    write_string += '{key}:{value}, '.format(key=key, value=value)
+                write_string += '\n{job}\n' \
+                                '===============================\n'.format(job=job)
+                write_string += job.keyword_matches
 
             print(write_string)
             print('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
@@ -246,10 +250,7 @@ class JobSite(object):
             else:
                 logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
 
-            for job_description in self.job_descriptions:
-                #TODO
-                self.discard_unmatched_job_descriptions()
-                    # logging.info('discard_unmatched_job_descriptions added these job descriptions : \n' + str([jd.title + ',' for jd in self.discarded_job_descriptions]))
+            self.discard_unmatched_job_descriptions()
 
         self.file_results()
 
