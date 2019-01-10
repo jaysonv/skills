@@ -101,7 +101,7 @@ class JobDescription(object):
 
     def __init__(self, url, title_selector):
         self.url = url
-        self.title = self._set_title(title_selector)
+        self.title = self._get_title(title_selector)
         self.should_discard = False
         self.per_title_match_dict = {}
 
@@ -138,11 +138,11 @@ class JobDescription(object):
         else:
             logging.warning('No title found')
 
-    def _set_title(self, title_selector):
+    def _get_title(self, title_selector):
         try:
             element_text = driver.find_element_by_xpath(title_selector).text
             if element_text:
-                self.title = element_text
+                return element_text
             else:
                 raise NoSuchElementException(
                     "Failed to find title with selector: {selector}".format(title_selector))
@@ -279,7 +279,7 @@ class JobSite(object):
             for job_description in self.job_descriptions:
                 job_description.get_job_description()
                 job_description.title_selector = self.job_descriptions_title_selector
-                job_description._set_title()
+                job_description._get_title()
                 job_description.set_should_discard()
                 if job_description.should_discard:
                     self.discard_unmatched_job_descriptions()
