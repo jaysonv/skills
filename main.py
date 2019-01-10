@@ -28,7 +28,7 @@ DATABASE_LANGUAGES = ('sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mong
 OTHER_KEYWORDS = ('restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka',
                   'mesos', 'django', 'pytest', 'css', 'html', 'appium')
 
-KEY_WORDS = PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DATABASE_LANGUAGES + OTHER_KEYWORDS
+KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DATABASE_LANGUAGES + OTHER_KEYWORDS)
 
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
@@ -131,14 +131,9 @@ class JobDescription(object):
         keydict = defaultdict(int)
         parsed_body = self._parse_body_text()
         logging.info('Matching keywords for ' + self.title)
-        print('Matching keywords for ' + self.title)
         for word in parsed_body:
-            for key in KEY_WORDS:
-                if word == key:
-                    logging.info('Found match {word} = {keyword}'.format(word=word, keyword=key))
-                    keydict[key] = 1
-                else:
-                    logging.debug('Did not find match {word} = {keyword}'.format(word=word, keyword=key))
+            if word in KEY_WORDS:
+                keydict[word] += 1
         if self.title:
             self.per_title_match_dict[self.title] = keydict
         else:
