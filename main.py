@@ -180,7 +180,7 @@ class JobSite(object):
                 self.discarded_job_descriptions.add(job)
         self.job_descriptions = list(set(self.job_descriptions) ^ self.discarded_job_descriptions)
 
-    def clean(self, links):
+    def filter_links(self, links):
         logging.info('Cleaning links')
         clean_links = [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
         logging.debug('Clean links : ' + str(clean_links))
@@ -210,13 +210,13 @@ class JobSite(object):
                 self.page(page_number)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
-                self.clean(get_links.by_tag_a(
+                self.filter_links(get_links.by_tag_a(
                     selenium_driver=driver, logging_context=logging))
             elif self.job_link_selector_type == 'xpath':
-                self.clean(get_links.by_xpath(
+                self.filter_links(get_links.by_xpath(
                     selenium_driver=driver, selector=self.job_descriptions_title_selector, logging_context=logging))
             elif self.job_link_selector_type == 'class':
-                self.clean(get_links.by_class())
+                self.filter_links(get_links.by_class())
             else:
                 logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
 
