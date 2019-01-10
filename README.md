@@ -2,6 +2,8 @@
 Scrapes Job Websites to help determine skill demand.
 This is a personal project that I'd like to morph into something useful for the general public.
 
+## CONTRIBUTING
+Take a look at the **Issues** filed for 'enhancement' or 'good first issue' . LMK if you want to tackle one of them
 ## Goals:
 * User able to input job title
 * User able to input job skill key words related to job title
