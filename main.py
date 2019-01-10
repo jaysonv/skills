@@ -216,7 +216,7 @@ class JobSite(object):
         self.job_descriptions += [JobDescription.from_url(link, driver, self.job_descriptions_title_selector) for link in clean_links]
 
     def file_results(self):
-        with open(JOB_OUTPUT_FILENAME, 'a') as file:
+        with open(JOB_OUTPUT_FILENAME, 'w') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}):\n'.format(len(self.discarded_job_descriptions)))
             write_string = ''
             write_string = '\n'.join(map(str, self.discarded_job_descriptions))
