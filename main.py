@@ -99,12 +99,11 @@ SITE_DICT = {
 
 class JobDescription(object):
 
-    def __init__(self, url, title_selector=None):
+    def __init__(self, url, title_selector):
         self.url = url
-        self.title = ''
+        self.title = self._set_title(title_selector)
         self.should_discard = False
         self.per_title_match_dict = {}
-        self.title_selector = title_selector
 
     def __str__(self):
         print_string = '==================================\n'
@@ -139,14 +138,14 @@ class JobDescription(object):
         else:
             logging.warning('No title found')
 
-    def _set_title(self):
+    def _set_title(self, title_selector):
         try:
-            element_text = driver.find_element_by_xpath(self.title_selector).text
+            element_text = driver.find_element_by_xpath(title_selector).text
             if element_text:
                 self.title = element_text
             else:
                 raise NoSuchElementException(
-                    "Failed to find title with selector: {selector}".format(self.title_selector))
+                    "Failed to find title with selector: {selector}".format(title_selector))
         except NoSuchElementException as e:
             logging.exception(exception=e)
 
