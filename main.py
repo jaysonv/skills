@@ -12,7 +12,7 @@ JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Qua
               'software development engineer in test',
               'software test engineer', 'software test automation', 'qa automation',
               'software quality assurance engineer', 'QA Automation Engineer', 'Senior QA Test and Automation Engineer', 'Sr. Quality Assurance Specialist', 'QA Automation Lead',
-
+                'Sr. Director, Quality Assurance',
               ]
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
@@ -35,7 +35,7 @@ INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
 INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
 INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
-INDEED_JOB_LINK_SELECTOR = None
+INDEED_JOB_LINK_SELECTOR = 'a'
 INDEED_TITLE_SELECTOR_TYPE = 'xpath'
 
 CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
@@ -45,13 +45,6 @@ CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
 CAREER_BUILDER_TITLE_SELECTOR_TYPE = 'css_selector'
 
-'''
-
-
-<a aria-label="Page 2" class="btn pagination-btn tertiary" href="https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?emp=jtft%2Cjtfp&amp;page_number=2&amp;pay=120&amp;radius=50&amp;sort=distance_asc">
-2
-</a>
-'''
 
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
@@ -132,11 +125,14 @@ class JobDescription(object):
         if self.title:
             logging.info('Parsing job description for ' + self.title)
             print('Parsing job description for ' + self.title)
-            body_text = driver.find_element_by_tag_name('body').text
-            parsed_text = body_text.split()
-            return parsed_text
+            try:
+                body_text = driver.find_element_by_tag_name('body').text
+                parsed_text = body_text.split()
+                return parsed_text
+            except NoSuchElementException:
+                logging.warning('Can not get body text for ' + self.url)
         else:
-            logging.warning('No title found')
+            logging.warning('No title found in self.title')
 
 
     def match_keywords(self):
@@ -287,7 +283,7 @@ class JobSite(object):
                 write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(self.job_descriptions))
                 write_string += '\n----------------------------------------------\n'
                 for job in self.job_descriptions:
-                    write_string += '\n' + job.title.upper() + '\n'
+                    write_string += '\n\n' + job.title.upper() + '\n'
                     write_string += '===============================\n'
                     if job.title != '' and job.title:
                         for key, value in job.per_title_match_dict[job.title].items():
@@ -349,29 +345,29 @@ class JobSite(object):
 def go():
     logging.info('PROCESSING INDEED')
     print('PROCESSING INDEED')
-    # indeed = JobSite(
-    #                  url=INDEED_URL,
-    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
-    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
-    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-    #                  site_id = 'indeed',
-    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-    #                  )
-    # indeed.process_site()
+    indeed = JobSite(
+                     url=INDEED_URL,
+                     paging_element_selector = INDEED_PAGING_SELECTOR,
+                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
+                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+                     site_id = 'indeed',
+                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+                     )
+    indeed.process_site()
 
-    logging.info('PROCESSING CAREER BUILDER')
-    print('PROCESSING CAREER BUILDER')
-    careerbuilder = JobSite(
-                            url = CAREER_BUILDER_URL,
-                            paging_element_selector = CAREER_BUILDER_PAGING_SELECTOR,
-                            job_link_selector_type = CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
-                            job_link_selector = CAREER_BUILDER_JOB_LINK_SELECTOR,
-                            job_descriptions_title_selector = CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
-                            site_id = 'careerbuilder',
-                            title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
-    )
-    careerbuilder.process_site()
+    # logging.info('PROCESSING CAREER BUILDER')
+    # print('PROCESSING CAREER BUILDER')
+    # careerbuilder = JobSite(
+    #                         url = CAREER_BUILDER_URL,
+    #                         paging_element_selector = CAREER_BUILDER_PAGING_SELECTOR,
+    #                         job_link_selector_type = CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
+    #                         job_link_selector = CAREER_BUILDER_JOB_LINK_SELECTOR,
+    #                         job_descriptions_title_selector = CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #                         site_id = 'careerbuilder',
+    #                         title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
+    # )
+    # careerbuilder.process_site()
 
 
 
