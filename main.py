@@ -216,7 +216,7 @@ class JobSite(object):
         logging.debug('Clean links : ' + str(clean_links))
         self.job_descriptions += [JobDescription.from_url(link, driver, self.job_descriptions_title_selector) for link in clean_links]
 
-    def file_results(self):
+    def output_results(self):
         with open(JOB_OUTPUT_FILENAME, 'w') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
             for job in self.discarded_job_descriptions:
@@ -252,7 +252,7 @@ class JobSite(object):
 
             self.discard_unmatched_job_descriptions()
 
-        self.file_results()
+        self.output_results()
 
     def get_links_by_class(self):
         pass
