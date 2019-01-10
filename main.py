@@ -141,14 +141,12 @@ class JobDescription(object):
 
     def _set_title(self):
         try:
-            element = driver.find_element_by_xpath(self.title_selector)
-            if element.text:
-                self.title = element.text
+            element_text = driver.find_element_by_xpath(self.title_selector).text
+            if element_text:
+                self.title = element_text
             else:
                 raise NoSuchElementException()
                 logging.warning('No title found')
-
-            logging.info('Setting title ' + self.title)
         except NoSuchElementException as e:
             logging.warning('FAILED TO SET TITLE {exception}'.format(exception=e))
 
