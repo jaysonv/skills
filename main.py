@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 import logging
 
+JOB_OUTPUT_FILENAME = 'job_output.txt'
+
 JOB_TITLES = ('Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
               'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
               'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
@@ -253,8 +255,7 @@ class JobSite(object):
         self.job_descriptions += [JobDescription(link) for link in clean_links]
 
     def file_results(self):
-        output_filename = 'job_output.txt'
-        with open(output_filename, 'a') as file:
+        with open(JOB_OUTPUT_FILENAME, 'a') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
             write_string = ''
             for jd in self.discarded_job_descriptions:
