@@ -195,7 +195,6 @@ class JobSite(object):
                 links += [element.get_attribute('href') for element in elements]
             except NoSuchElementException:
                 logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
-                print('NoSuchElementException')
         if links:
             logging.info('Returning links: ' + str(links))
         else:
