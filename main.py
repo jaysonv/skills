@@ -149,11 +149,8 @@ class JobDescription(object):
                 logging.warning('No title found')
 
             logging.info('Setting title ' + self.title)
-            print('Setting title ' + self.title)
-        except NoSuchElementException:
-            logging.warning('FAILED TO SET TITLE NoSuchElementException')
-            print('FAILED TO SET TITLE NoSuchElementException')
-
+        except NoSuchElementException as e:
+            logging.warning('FAILED TO SET TITLE {exception}'.format(exception=e))
 
     def set_should_discard(self):
         print('Discarding bad job descriptions')
