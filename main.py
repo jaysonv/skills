@@ -106,8 +106,7 @@ class JobDescription(object):
         self.keyword_matches = keyword_matches
 
     def __str__(self):
-        # TODO
-        pass
+        return self.title
 
     @classmethod
     def from_url(cls, url, selenium_driver, title_selector):
@@ -196,10 +195,12 @@ class JobSite(object):
         return links
 
     def discard_unmatched_job_descriptions(self):
+        return
+        # TODO
         for index, jd in enumerate(self.job_descriptions):
-            if jd.should_discard:
-                logging.info('Adding {title} to discard list'.format(title=jd.title))
-                self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
+            #if jd.should_discard:
+                #logging.info('Adding {title} to discard list'.format(title=jd.title))
+                #self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
 
     def clean(self, links):
         logging.info('Cleaning links')
@@ -212,8 +213,8 @@ class JobSite(object):
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}):\n'.format(len(self.discarded_job_descriptions)))
             write_string = ''
             # TODO, simplify this with JobDescription changes
-            for jd in self.discarded_job_descriptions:
-                write_string += jd.title + '\n'
+            #for jd in self.discarded_job_descriptions:
+                #write_string += jd.title + '\n'
             write_string += '-----------------------------\n' \
                             'MATCHING JOB TITLES (TOTAL {}):\n'.format(len(self.job_descriptions))
             for job in self.job_descriptions:
@@ -230,7 +231,8 @@ class JobSite(object):
     def process_site(self):
         self.launch_main_page()
 
-        for page in range(6):
+        #TODO, change back to 6
+        for page in range(1):
             if page >= 1:
                 self.page(page)
             # Get links by selector type
