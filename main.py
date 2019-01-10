@@ -173,6 +173,7 @@ class JobSite(object):
             logging.warning('ElementClickInterceptedException for index ' + str(index))
 
     def get_links_by_tag_a(self):
+        logging.info('Getting links by tag')
         try:
             links = []
             logging.info('Finding link elements')
@@ -187,6 +188,7 @@ class JobSite(object):
             print('NoSuchElementException')
 
     def get_links_by_xpath(self):
+        logging.info('Getting links by xpath')
         links = []
         for index in range(1001):
             try:
@@ -238,10 +240,8 @@ class JobSite(object):
                 self.page(page_number)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
-                logging.info('Getting links by tag')
                 self.clean(self.get_links_by_tag_a())
             elif self.job_link_selector_type == 'xpath':
-                logging.info('Getting links by xpath')
                 self.clean(self.get_links_by_xpath())
             elif self.job_link_selector_type == 'class':
                 self.clean(self.get_links_by_class())
