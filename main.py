@@ -157,12 +157,12 @@ class JobSite(object):
     def launch_main_page(self):
         driver.get(self.url)
 
-    def go_to_page(self, index):
-        logging.info('Paging index is ' + str(index))
+    def go_to_page(self, page_number):
+        logging.info('Paging page_number is ' + str(page_number))
         try:
-            if index >= 1:
-                driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
-                logging.info('Page by clicking ' + self.paging_element_selector.format(index))
+            if page_number >= 1:
+                driver.find_element_by_xpath(self.paging_element_selector.format(page_number)).click()
+                logging.info('Page by clicking ' + self.paging_element_selector.format(page_number))
             else:
                 driver.find_element_by_xpath(self.paging_element_selector).click()
                 logging.info('Page by clicking ' + self.paging_element_selector)
@@ -171,7 +171,7 @@ class JobSite(object):
             print('NoSuchElementException - which might be expected')
             logging.warning('NoSuchElementException - which might be expected')
         except ElementClickInterceptedException:
-            logging.warning('ElementClickInterceptedException for index ' + str(index))
+            logging.warning('ElementClickInterceptedException for page_number ' + str(page_number))
 
     def discard_unmatched_job_descriptions(self):
         for job in self.job_descriptions:
