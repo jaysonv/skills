@@ -252,21 +252,19 @@ class JobSite(object):
 
     def file_results(self):
         with open(JOB_OUTPUT_FILENAME, 'a') as file:
-            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
+            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}):\n'.format(len(self.discarded_job_descriptions)))
             write_string = ''
             # TODO, simplify this with JobDescription changes
             for jd in self.discarded_job_descriptions:
                 write_string += jd.title + '\n'
             write_string += '-----------------------------\n' \
-                            'MATCHING JOB TITLES (TOTAL {})\n' \
-                            '-----------------------------\n'.format(len(self.job_descriptions))
+                            'MATCHING JOB TITLES (TOTAL {}):\n'.format(len(self.job_descriptions))
             for job in self.job_descriptions:
                 if job.title:
-                    write_string += '\n{job_title}\n'.format(job_title=job.title.upper())
-                    write_string += '===============================\n'
+                    write_string += '\n{job_title}\n' \
+                                    '===============================\n'.format(job_title=job.title.upper())
                     for key, value in job.per_title_match_dict[job.title].items():
                         write_string += '{key}:{value}, '.format(key=key, value=value)
-
 
             print(write_string)
             print('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
