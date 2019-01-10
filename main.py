@@ -246,15 +246,10 @@ class JobSite(object):
                 logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
 
             for job_description in self.job_descriptions:
-                job_description.get_job_description()
-                job_description.title_selector = self.job_descriptions_title_selector
-                job_description._get_title()
-                job_description.set_should_discard()
-                if job_description.should_discard:
-                    self.discard_unmatched_job_descriptions()
-                    logging.info('discard_unmatched_job_descriptions added these job descriptions : \n' + str([jd.title + ',' for jd in self.discarded_job_descriptions]))
-                else:
-                    job_description.match_keywords()
+                #TODO
+                self.discard_unmatched_job_descriptions()
+                    # logging.info('discard_unmatched_job_descriptions added these job descriptions : \n' + str([jd.title + ',' for jd in self.discarded_job_descriptions]))
+
         self.file_results()
 
     def get_links_by_class(self):
