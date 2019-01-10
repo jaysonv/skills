@@ -1,8 +1,9 @@
 import logging
+from functools import partial
 from selenium.common.exceptions import NoSuchElementException
 
 
-def by_tag_a(selenium_driver, logging_context=logging.getLogger('GetLinkLogger')):
+def by_tag_a(selenium_driver, logging_context):
     logging_context.info('Getting links by tag...')
     links = []
     try:
@@ -15,11 +16,11 @@ def by_tag_a(selenium_driver, logging_context=logging.getLogger('GetLinkLogger')
     return links
 
 
-def by_xpath(selenium_driver, selector, logging_context=logging.getLogger('GetLinkLogger')):
+def by_xpath(selenium_driver, title_selector, logging_context):
     logging_context.info('Getting links by xpath...')
     links = []
     for index in range(1001):
-        formatted_selector = selector.format(index)
+        formatted_selector = title_selector.format(index)
         try:
             logging_context.info('Extracting links...')
             elements = selenium_driver.find_elements_by_xpath(formatted_selector)
@@ -31,7 +32,7 @@ def by_xpath(selenium_driver, selector, logging_context=logging.getLogger('GetLi
 
 
 def by_class():
-    return []
+    raise NotImplementedError("Job title selection by class not yet implemented")
     # try:
     #     links = []
     #     print('Finding link elements')
@@ -43,3 +44,14 @@ def by_class():
     #     return links
     # except NoSuchElementException:
     #     print('NoSuchElementException')
+
+
+def get_link_func(selector_tag_type, selenium_driver,
+                  *, job_title_selector, logging_context=logging.getLogger('GetLinkLogger')):
+    if selector_tag_type == 'tag':
+        return partial(by_tag_a, selenium_driver, logging_context)
+    elif selector_tag_type == 'xpath':
+        partial(by_xpath, selenium_driver, job_title_selector, logging_context)
+    elif selector_tag_type == 'class':
+        raise NotImplementedError("Job title selection by class not yet implemented")
+        partial(by_class, **kwargs)
