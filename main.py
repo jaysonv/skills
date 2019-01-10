@@ -225,7 +225,7 @@ class JobSite(object):
 
     def get_links_by_xpath(self):
         links = []
-        for index in range(0, 1001):
+        for index in range(1001):
             try:
                 elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
                 logging.info('Found elements by xpath: ' + self.job_link_selector.format(str(index)))
@@ -253,35 +253,35 @@ class JobSite(object):
         self.job_descriptions += [JobDescription(link) for link in clean_links]
 
     def file_results(self):
-            output_filename = 'job_output.txt'
-            with open(output_filename, 'a') as file:
-                file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
-                write_string = ''
-                for jd in self.discarded_job_descriptions:
-                    write_string += jd.title + '\n'
-                write_string += '\n----------------------------------------------\n'
-                write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(self.job_descriptions))
-                write_string += '\n----------------------------------------------\n'
-                for job in self.job_descriptions:
-                    write_string += '\n' + job.title.upper() + '\n'
-                    write_string += '===============================\n'
-                    if job.title != '' and job.title:
-                        for key, value in job.per_title_match_dict[job.title].items():
-                            try:
-                                write_string += '{key}:{value}, '.format(key=key, value=value)
-                            except KeyError:
-                                logging.warning('KeyError key = ' + key)
-                                write_string += 'KeyError key = ' + key
+        output_filename = 'job_output.txt'
+        with open(output_filename, 'a') as file:
+            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
+            write_string = ''
+            for jd in self.discarded_job_descriptions:
+                write_string += jd.title + '\n'
+            write_string += '\n----------------------------------------------\n'
+            write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(self.job_descriptions))
+            write_string += '\n----------------------------------------------\n'
+            for job in self.job_descriptions:
+                write_string += '\n' + job.title.upper() + '\n'
+                write_string += '===============================\n'
+                if job.title != '' and job.title:
+                    for key, value in job.per_title_match_dict[job.title].items():
+                        try:
+                            write_string += '{key}:{value}, '.format(key=key, value=value)
+                        except KeyError:
+                            logging.warning('KeyError key = ' + key)
+                            write_string += 'KeyError key = ' + key
 
-                print(write_string)
-                print('Writing results to file')
-                file.write(write_string)
+            print(write_string)
+            print('Writing results to file')
+            file.write(write_string)
 
     def process_site(self):
         self.launch_main_page()
 
-        for page in range(0,6):
-            if page >=1:
+        for page in range(6):
+            if page >= 1:
                 self.page(page)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
