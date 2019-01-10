@@ -235,9 +235,9 @@ class JobSite(object):
         self.launch_main_page()
 
         #TODO, change back to 6
-        for page in range(1):
-            if page >= 1:
-                self.page(page)
+        for page_number in range(1):
+            if page_number >= 1:
+                self.page(page_number)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
                 logging.info('Getting links by tag')
