@@ -249,8 +249,7 @@ class JobSite(object):
 
     def clean(self, links):
         logging.info('Cleaning links')
-        clean_links = []
-        clean_links += [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
+        clean_links = [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
         logging.debug('Clean links : ' + str(clean_links))
         self.job_descriptions += [JobDescription(link) for link in clean_links]
 
