@@ -157,7 +157,7 @@ class JobSite(object):
     def launch_main_page(self):
         driver.get(self.url)
 
-    def page(self, index):
+    def go_to_page(self, index):
         logging.info('Paging index is ' + str(index))
         try:
             if index >= 1:
@@ -207,7 +207,7 @@ class JobSite(object):
         #TODO, change back to 6
         for page_number in range(1):
             if page_number >= 1:
-                self.page(page_number)
+                self.go_to_page(page_number)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
                 self.filter_links(get_links.by_tag_a(
