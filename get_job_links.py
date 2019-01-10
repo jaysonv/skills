@@ -54,4 +54,3 @@ def get_link_func(selector_tag_type, selenium_driver,
         partial(by_xpath, selenium_driver, job_title_selector, logging_context)
     elif selector_tag_type == 'class':
         raise NotImplementedError("Job title selection by class not yet implemented")
-        partial(by_class, **kwargs)
