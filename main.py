@@ -139,7 +139,7 @@ class JobDescription(object):
         else:
             logging.warning('No title found')
 
-    def set_title(self):
+    def _set_title(self):
         try:
             element = driver.find_element_by_xpath(self.title_selector)
             if element.text:
@@ -282,7 +282,7 @@ class JobSite(object):
             for job_description in self.job_descriptions:
                 job_description.get_job_description()
                 job_description.title_selector = self.job_descriptions_title_selector
-                job_description.set_title()
+                job_description._set_title()
                 job_description.set_should_discard()
                 if job_description.should_discard:
                     self.discard_unmatched_job_descriptions()
