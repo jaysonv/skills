@@ -145,10 +145,10 @@ class JobDescription(object):
             if element_text:
                 self.title = element_text
             else:
-                raise NoSuchElementException()
-                logging.warning('No title found')
+                raise NoSuchElementException(
+                    "Failed to find title with selector: {selector}".format(self.title_selector))
         except NoSuchElementException as e:
-            logging.warning('FAILED TO SET TITLE {exception}'.format(exception=e))
+            logging.exception(exception=e)
 
     def set_should_discard(self):
         print('Discarding bad job descriptions')
