@@ -30,6 +30,8 @@ OTHER_KEYWORDS = ('restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy'
 
 KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DATABASE_LANGUAGES + OTHER_KEYWORDS)
 
+JOB_DESCRIPTION_IDENTIFIER = 'clk?jk'
+
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
 INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
@@ -210,7 +212,7 @@ class JobSite(object):
 
     def clean(self, links):
         logging.info('Cleaning links')
-        clean_links = [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
+        clean_links = [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
         logging.debug('Clean links : ' + str(clean_links))
         self.job_descriptions += [JobDescription.from_url(link, driver, self.job_descriptions_title_selector) for link in clean_links]
 
