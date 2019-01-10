@@ -8,26 +8,27 @@ import logging
 
 JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
               'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
-              'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
-              'software development engineer in test',
-              'software test engineer', 'software test automation', 'qa automation',
+              'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet', 'Sr. QA Engineer, NMS/Data Analytics (34054)'
+              'software development engineer in test', 'Sr QA Automation Engineer -Cloud', 'QA Lead - RPA', 'Software Engineer, Mobile QA Automation',
+              'software test engineer', 'software test automation', 'qa automation', 'Senior QA Engineer', 'QA Automation Manager', 'Senior Mobile QA Engineer',
               'software quality assurance engineer', 'QA Automation Engineer', 'Senior QA Test and Automation Engineer', 'Sr. Quality Assurance Specialist', 'QA Automation Lead',
-                'Sr. Director, Quality Assurance',
+                'Sr. Director, Quality Assurance', 'Sr. QA Automation Engineer (Python)', 'Software QA Engineer', 'QA Engineer (Automation)', 'Senior QA Automation Engineer',
+              'Staff QA Engineer', 'QA Lead (Mobile and Backend)', 'QA Automation with python/cloud', 'Senior Software QA Engineer - Selenium',
               ]
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
-                     'php', 'Sauce Labs',
-                     'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence']
-analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
-                     'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira']
+                     'php', 'Sauce Labs', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
+                     'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
+analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
+                     'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
-                'elasticsearch']
+                'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend']
 databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle db',
-             'rdbms',
+             'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white',
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
-             'kubernetes', 'storage', 'network', 'networking']
+             'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium',]
+         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'Acceptance', 'uat', 'healthcare', 'banking']
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
@@ -46,6 +47,15 @@ CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1
 CAREER_BUILDER_TITLE_SELECTOR_TYPE = 'css_selector'
 
 
+
+DICE_URL = 'https://www.dice.com/jobs/q-Software_QA_Engineer-jtype-Full+Time-l-Santa_Clara%2C_CA-radius-50-jobs'
+DICE_JOB_DESCRIPTION_TITLE_SELECTOR ='//*[@id="jt"]'
+DICE_PAGING_SELECTOR = '//*[@id="dice_paging_btm"]/ul/li[{}]/a'
+DICE_JOB_LINK_SELECTOR_TYPE = 'xpath'
+DICE_JOB_LINK_SELECTOR = '//*[@id="position{}"]'
+DICE_TITLE_SELECTOR_TYPE = 'xpath'
+
+
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
 
@@ -56,49 +66,6 @@ def make_date_string():
 
 logging.basicConfig(filename='execution_{date}.log'.format(date = make_date_string()), level=logging.INFO)
 
-'''
-SITE_DICT = {
-
-
-    'dice':
-        {
-            'url': 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all={title}&for_exact=&for_none=&for_jt=&for_com=&for_loc=Santa+Clara%2C+CA&jtype=Full+Time&sort=relevance&limit=100&radius=50&jtype=Full+Time&limit=100&radius=50&jtype=Full+Time',
-            'format_string': None,
-            'job_link_element_selector_type': None,
-
-            'job_element_selector': None,
-            'paging_element_selector': '/html/body/div[8]/div[3]/div[2]/div[1]/div[6]/div[2]/div/ul/li[{}]/a',
-            'paging_type': 'page',
-            },
-    'monster':
-        {
-            'url': 'https://www.monster.com/jobs/search/Full-Time_8?q=software-quality-assurance&intcid=skr_navigation_nhpso_searchMain&rad=50&where=Los-Gatos__2c-CA&tm=30',
-            'format_string': None,
-            'job_link_element_selector_type': None,  # NEED TO BE "PAGED    "
-            'job_element_selector': None,
-            'paging_element_selector': '//*[@id="loadMoreJobs"]',
-            'paging_type': 'button',
-
-        },
-    'glass_door':
-        {
-            'url': 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword=Software%20Quality%20Assurance%20Engineer&locT=C&locId=1147436&locKeyword=San%20Jose,%20CA&jobType=fulltime&fromAge=30&minSalary=170000&includeNoSalaryJobs=false&radius=25&cityId=-1&minRating=4.00&industryId=-1&companyId=-1&applicationType=0&employerSizes=0&remoteWorkType=0',
-            'format_string': None,
-            'job_link_element_selector_type': None,
-            'job_element_selector': None,
-            'paging_element_selector': '/html/body/div[3]/div/div/div/div[1]/div/div[2]/section/article/div/div[3]/div[2]/div/div/ul/li[{}]/a',
-            'paging_type': 'page',
-            },
-    'linked_in':
-        {
-            'url': 'https://www.linkedin.com/jobs/search/?distance=50&f_E=3%2C4&f_JT=F&f_SB2=5&f_TP=1%2C2%2C3%2C4&keywords=software%20quality%20assurance%20engineer&location=Santa%20Clara%2C%20California&locationId=PLACES.us.7-1-0-43-18',
-            'format_string': None,
-            'job_link_element_selector_type': None,
-            'job_element_selector': None,
-            'paging_element_selector': '//*[@id="ember975"]/li/ol/li[{}]/button',
-            'paging_type': 'page',  # yes, page!
-            },
-'''
 
 class JobDescription(object):
 
@@ -138,17 +105,17 @@ class JobDescription(object):
     def match_keywords(self):
         keydict = {}
         for key in KEY_WORDS:
-            keydict[key] = 0
+            keydict[key.lower()] = 0
         parsed_body = self._parse_body_text()
         logging.info('Matching keywords for ' + self.title)
         print('Matching keywords for ' + self.title)
         for word in parsed_body:
             for key in KEY_WORDS:
-                if word == key:
-                    logging.info('Found match {word} = {keyword}'.format(word = word, keyword = key))
+                if word.lower() == key.lower():
+                    logging.info('Found match {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
                     keydict[key] = 1
                 else:
-                    logging.debug('Did not find match {word} = {keyword}'.format(word = word, keyword = key))
+                    logging.debug('Did not find match {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
         if self.title:
             self.per_title_match_dict[self.title] = keydict
         else:
@@ -175,11 +142,9 @@ class JobDescription(object):
             logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector)
             print('FAILED TO SET TITLE NoSuchElementException')
 
-        #import pdb; pdb.set_trace()
-
 
     def set_should_discard(self):
-        print('Discarding bad job descriptions')
+        print('Discarding bad job descriptions if any')
         set_of_title = set()
         if self.title:
             set_of_title.add(self.title.lower())
@@ -189,8 +154,10 @@ class JobDescription(object):
         [set_of_matching.add(title.lower()) for title in JOB_TITLES]
         match = bool(set_of_matching.intersection(set_of_title))
         if match:
+            print('Did not discard ' + self.title)
             logging.info('Did not discard ' + self.title)
         else:
+            print('Discarding ' + self.title)
             logging.info('Discarding ' + self.title)
             self.should_discard = True
 
@@ -344,18 +311,18 @@ class JobSite(object):
 
 def go():
     logging.info('PROCESSING INDEED')
-    print('PROCESSING INDEED')
-    indeed = JobSite(
-                     url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR,
-                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-                     site_id = 'indeed',
-                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-                     )
-    indeed.process_site()
-
+    # print('PROCESSING INDEED')
+    # indeed = JobSite(
+    #                  url=INDEED_URL,
+    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
+    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
+    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #                  site_id = 'indeed',
+    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+    #                  )
+    # indeed.process_site()
+    #
     # logging.info('PROCESSING CAREER BUILDER')
     # print('PROCESSING CAREER BUILDER')
     # careerbuilder = JobSite(
@@ -368,9 +335,18 @@ def go():
     #                         title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
     # )
     # careerbuilder.process_site()
-
-
-
+    logging.info('PROCESSING DICE')
+    print('PROCESSING DICE')
+    dice = JobSite(
+        url=DICE_URL,
+        paging_element_selector=DICE_PAGING_SELECTOR,
+        job_link_selector_type=DICE_JOB_LINK_SELECTOR_TYPE,
+        job_link_selector=DICE_JOB_LINK_SELECTOR,
+        job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
+        site_id='dice',
+        title_selector_type=DICE_TITLE_SELECTOR_TYPE,
+    )
+    dice.process_site()
 
     print('Finished')
 
