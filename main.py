@@ -1,8 +1,5 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-from selenium.common.exceptions import InvalidSessionIdException
-from selenium.common.exceptions import TimeoutException, InvalidArgumentException
-from selenium.webdriver.common.by import By
 from datetime import datetime
 import logging
 
