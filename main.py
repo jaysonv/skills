@@ -9,13 +9,11 @@ import logging
 JOB_TITLES = ('Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
               'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
               'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
-              'software development engineer in test',
-              'software test engineer', 'software test automation', 'qa automation',
-              'software quality assurance engineer', 'QA Automation Engineer')
+              'software development engineer in test', 'software test engineer', 'software test automation',
+              'qa automation', 'software quality assurance engineer', 'QA Automation Engineer')
 
 program_languages = ('bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
-                     'php',
-                     'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence')
+                     'php', 'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence')
 
 analysis_software = ('tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira')
@@ -23,13 +21,12 @@ analysis_software = ('tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 
 bigdata_tool = ('hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
                 'elasticsearch')
 
-databases = ('sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle db',
-             'rdbms',
-             'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
-             'kubernetes', 'storage', 'network', 'networking')
+databases = ('sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre',
+             'oracle db', 'rdbms', 'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker',
+             'container', 'puppet', 'chef', 'kubernetes', 'storage', 'network', 'networking')
 
-other = ('restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium')
+other = ('restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka',
+         'mesos', 'django', 'pytest', 'css', 'html', 'appium')
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 
