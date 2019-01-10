@@ -1,4 +1,5 @@
 from collections import defaultdict, Counter
+import get_links
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from datetime import datetime
@@ -172,37 +173,6 @@ class JobSite(object):
         except ElementClickInterceptedException:
             logging.warning('ElementClickInterceptedException for index ' + str(index))
 
-    def get_links_by_tag_a(self):
-        logging.info('Getting links by tag')
-        try:
-            links = []
-            logging.info('Finding link elements')
-            print('Finding link elements')
-            elements = driver.find_elements_by_tag_name('a')
-            print('Extracting links')
-            links += ([element.get_attribute('href') for element in elements if element.get_attribute('href') != None ])
-            logging.debug('Links found : ' + str(links))
-            return links
-        except NoSuchElementException:
-            logging.warning('NoSuchElementException finding job description links')
-            print('NoSuchElementException')
-
-    def get_links_by_xpath(self):
-        logging.info('Getting links by xpath')
-        links = []
-        for index in range(1001):
-            try:
-                elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
-                logging.info('Found elements by xpath: ' + self.job_link_selector.format(str(index)))
-                links += [element.get_attribute('href') for element in elements]
-            except NoSuchElementException:
-                logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
-        if links:
-            logging.info('Returning links: ' + str(links))
-        else:
-            logging.info('No links found')
-        return links
-
     def discard_unmatched_job_descriptions(self):
         for job in self.job_descriptions:
             if job is None or job.hasNoMatches():
@@ -240,31 +210,18 @@ class JobSite(object):
                 self.page(page_number)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
-                self.clean(self.get_links_by_tag_a())
+                self.clean(get_links.by_tag_a(
+                    selenium_driver=driver, logging_context=logging))
             elif self.job_link_selector_type == 'xpath':
-                self.clean(self.get_links_by_xpath())
+                self.clean(get_links.by_xpath(
+                    selenium_driver=driver, selector=self.job_descriptions_title_selector, logging_context=logging))
             elif self.job_link_selector_type == 'class':
-                self.clean(self.get_links_by_class())
+                self.clean(get_links.by_class())
             else:
                 logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
 
             self.discard_unmatched_job_descriptions()
-
         self.output_results()
-
-    def get_links_by_class(self):
-        pass
-        # try:
-        #     links = []
-        #     print('Finding link elements')
-        #     elements = driver.find_elements_by_class_name(class_name)
-        #     print('Extracting links')
-        #     for element in elements:
-        #         links += element.get_attribute('href')
-        #     logging.info('Returning links: ' + [link + ', ' for link in links])
-        #     return links
-        # except NoSuchElementException:
-        #     print('NoSuchElementException')
 
 def go():
     logging.info('PROCESSING INDEED')
