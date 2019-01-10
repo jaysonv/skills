@@ -345,8 +345,7 @@ def go():
     careerbuilder.process_site()
     print('Finished')
 
-'''
-MAIN
-'''
-go()
-driver.close()
+
+if __name__ == '__main__':
+    go()
+    driver.close()
