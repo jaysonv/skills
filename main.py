@@ -11,10 +11,12 @@ JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Qua
               'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
               'software development engineer in test',
               'software test engineer', 'software test automation', 'qa automation',
-              'software quality assurance engineer', 'QA Automation Engineer']
+              'software quality assurance engineer', 'QA Automation Engineer', 'Senior QA Test and Automation Engineer', 'Sr. Quality Assurance Specialist', 'QA Automation Lead',
+
+              ]
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
-                     'php',
+                     'php', 'Sauce Labs',
                      'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira']
@@ -34,13 +36,22 @@ INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engi
 INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
 INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
 INDEED_JOB_LINK_SELECTOR = None
-
+INDEED_TITLE_SELECTOR_TYPE = 'xpath'
 
 CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
-CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = '//*[@id="main-content"]/div[10]/div[3]/div[1]/div/div[1]/h1'
-CAREER_BUILDER_PAGING_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]'
+CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = '.large-push-3 > div:nth-child(1) > div:nth-child(1) > h1:nth-child(1)'
+CAREER_BUILDER_PAGING_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]'
 CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
+CAREER_BUILDER_TITLE_SELECTOR_TYPE = 'css_selector'
+
+'''
+
+
+<a aria-label="Page 2" class="btn pagination-btn tertiary" href="https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?emp=jtft%2Cjtfp&amp;page_number=2&amp;pay=120&amp;radius=50&amp;sort=distance_asc">
+2
+</a>
+'''
 
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
@@ -98,12 +109,13 @@ SITE_DICT = {
 
 class JobDescription(object):
 
-    def __init__(self, url, title_selector = None):
+    def __init__(self, url, title_selector = None, title_selector_type = None):
         self.url = url
         self.title = ''
         self.should_discard = False
         self.per_title_match_dict = {}
         self.title_selector = title_selector
+        self.title_selector_type = title_selector_type
 
     def __str__(self):
         print_string = '==================================\n'
@@ -148,18 +160,26 @@ class JobDescription(object):
 
     def set_title(self):
         try:
-            element = driver.find_element_by_xpath(self.title_selector)
+            if self.title_selector_type == 'xpath':
+                element = driver.find_element_by_xpath(self.title_selector)
+            elif self.title_selector_type == 'tag':
+                element = driver.find_element_by_tag_name(self.title_selector)
+            elif self.title_selector_type == 'class':
+                element = driver.find_element_by_class(self.title_selector)
+            elif self.title_selector_type == 'css_selector':
+                element = driver.find_element_by_css_selector(self.title_selector)
+
             if element.text:
                 self.title = element.text
+                logging.info('Setting title ' + self.title)
+                print('Setting title ' + self.title)
             else:
-                raise NoSuchElementException()
-                logging.warning('No title found')
-
-            logging.info('Setting title ' + self.title)
-            print('Setting title ' + self.title)
+                logging.warning('No title found with selector ' + self.title_selector)
         except NoSuchElementException:
-            logging.warning('FAILED TO SET TITLE NoSuchElementException')
+            logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector)
             print('FAILED TO SET TITLE NoSuchElementException')
+
+        #import pdb; pdb.set_trace()
 
 
     def set_should_discard(self):
@@ -181,7 +201,7 @@ class JobDescription(object):
 class JobSite(object):
 
     def __init__(self,
-                 url, paging_element_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector):
+                 url, paging_element_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector, site_id, title_selector_type):
         self.url = url
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
@@ -189,6 +209,8 @@ class JobSite(object):
         self.job_link_selector_type = job_link_selector_type
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.job_link_selector = job_link_selector
+        self.site_id = site_id
+        self.title_selector_type = title_selector_type
 
     def launch_main_page(self):
         driver.get(self.url)
@@ -204,10 +226,10 @@ class JobSite(object):
                 logging.info('Page by clicking ' + self.paging_element_selector)
             print('Paging / clicking "Load More.."')
         except NoSuchElementException:
-            print('NoSuchElementException - which might be expected')
-            logging.warning('NoSuchElementException - which might be expected')
+            print('NoSuchElementException - which might be expected when paging')
+            logging.warning('NoSuchElementException - which might be expected when paging using ' + self.paging_element_selector.format(index))
         except ElementClickInterceptedException:
-            logging.warning('ElementClickInterceptedException for index ' + str(index))
+            logging.warning('ElementClickInterceptedException for ' + self.paging_element_selector.format(index))
 
     def get_links_by_tag_a(self):
         try:
@@ -220,23 +242,22 @@ class JobSite(object):
             logging.debug('Links found : ' + str(links))
             return links
         except NoSuchElementException:
-            logging.warning('NoSuchElementException finding job description links')
+            logging.warning('NoSuchElementException finding job description links by tag name')
             print('NoSuchElementException')
+
 
     def get_links_by_xpath(self):
         links = []
         for index in range(0, 1001):
             try:
                 elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
-                logging.info('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
+                logging.debug('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
                 links += [element.get_attribute('href') for element in elements]
             except NoSuchElementException:
                 logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
                 print('NoSuchElementException')
-        if links:
-            logging.info('Returning links: ' + str(links))
-        else:
-            logging.info('No links found')
+
+        logging.info('Returning links: ' + str(links))
         return links
 
     def discard_unmatched_job_descriptions(self):
@@ -246,11 +267,14 @@ class JobSite(object):
                 self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
 
     def clean(self, links):
-        logging.info('Cleaning links')
-        clean_links = []
-        clean_links += [link for link in links if 'clk?jk' in link]  #unique identifier for links to job descriptions = 'clk?jk'
-        logging.debug('Clean links : ' + str(clean_links))
-        self.job_descriptions += [JobDescription(link) for link in clean_links]
+        if self.site_id == 'indeed':
+            logging.info('Cleaning links')
+            clean_links = []
+            clean_links += [link for link in links if 'clk?jk' in link]  #unique identifier for links on indeed to job descriptions = 'clk?jk'
+            logging.debug('Clean links : ' + str(clean_links))
+            self.job_descriptions += [JobDescription(link) for link in clean_links]
+        else:
+            self.job_descriptions += [JobDescription(link) for link in links]
 
     def file_results(self):
             output_filename = 'job_output.txt'
@@ -298,6 +322,7 @@ class JobSite(object):
             for job_description in self.job_descriptions:
                 job_description.get_job_description()
                 job_description.title_selector = self.job_descriptions_title_selector
+                job_description.title_selector_type = self.title_selector_type
                 job_description.set_title()
                 job_description.set_should_discard()
                 if job_description.should_discard:
@@ -324,14 +349,16 @@ class JobSite(object):
 def go():
     logging.info('PROCESSING INDEED')
     print('PROCESSING INDEED')
-    indeed = JobSite(
-                     url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR,
-                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-                     )
-    indeed.process_site()
+    # indeed = JobSite(
+    #                  url=INDEED_URL,
+    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
+    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
+    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #                  site_id = 'indeed',
+    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+    #                  )
+    # indeed.process_site()
 
     logging.info('PROCESSING CAREER BUILDER')
     print('PROCESSING CAREER BUILDER')
@@ -341,8 +368,14 @@ def go():
                             job_link_selector_type = CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
                             job_link_selector = CAREER_BUILDER_JOB_LINK_SELECTOR,
                             job_descriptions_title_selector = CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
-                            )
+                            site_id = 'careerbuilder',
+                            title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
+    )
     careerbuilder.process_site()
+
+
+
+
     print('Finished')
 
 '''
