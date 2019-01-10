@@ -7,12 +7,12 @@ def by_tag_a(selenium_driver, logging_context=logging.getLogger('GetLinkLogger')
     links = []
     try:
         logging_context.info('Extracting links...')
-        elements = selenium_driver.find_elements_by_tag_name('a')
-        links.extend([element.get_attribute('href') for element in elements if element.get_attribute('href') != None])
-        logging_context.debug('Links found : ' + str(links))
-        return links
+        elements = [element.get_attribute('href') for element in selenium_driver.find_elements_by_tag_name('a')]
+        links.extend(filter(None, elements))
     except NoSuchElementException:
         logging_context.warning('NoSuchElementException finding job description links')
+    logging_context.debug('Links found : ' + str(links))
+    return links
 
 
 def by_xpath(selenium_driver, selector, logging_context=logging.getLogger('GetLinkLogger')):
