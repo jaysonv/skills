@@ -217,19 +217,18 @@ class JobSite(object):
 
     def file_results(self):
         with open(JOB_OUTPUT_FILENAME, 'w') as file:
-            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}):\n'.format(len(self.discarded_job_descriptions)))
-            write_string = ''
-            write_string = '\n'.join(map(str, self.discarded_job_descriptions))
-            write_string += '-----------------------------\n' \
-                            'MATCHING JOB TITLES (TOTAL {}):\n'.format(len(self.job_descriptions))
-            for job in self.job_descriptions:
-                write_string += '\n{job}\n' \
-                                '===============================\n'.format(job=job)
-                write_string += job.keyword_matches
+            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
+            for job in self.discarded_job_descriptions:
+                file.write('{}\n'.format(job))
 
-            print(write_string)
-            print('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
-            file.write(write_string)
+            print('-----------------------------')
+            print('MATCHING JOB TITLES (TOTAL {})'.format(len(self.job_descriptions)))
+            for job in self.job_descriptions:
+                print(job)
+                print('Keyword matches: {}'.format(job.keyword_matches))
+                print('===============================')
+
+            logging.info('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
 
     def process_site(self):
         self.launch_main_page()
