@@ -265,11 +265,8 @@ class JobSite(object):
                     write_string += '\n{job_title}\n'.format(job_title=job.title.upper())
                     write_string += '===============================\n'
                     for key, value in job.per_title_match_dict[job.title].items():
-                        try:
-                            write_string += '{key}:{value}, '.format(key=key, value=value)
-                        except KeyError:
-                            logging.warning('KeyError key = ' + key)
-                            write_string += 'KeyError key = ' + key
+                        write_string += '{key}:{value}, '.format(key=key, value=value)
+
 
             print(write_string)
             print('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
