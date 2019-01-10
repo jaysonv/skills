@@ -46,8 +46,8 @@ def by_class():
     #     print('NoSuchElementException')
 
 
-def get_link_func(selector_tag_type, selenium_driver,
-                  *, job_title_selector, logging_context=logging.getLogger('GetLinkLogger')):
+def get_link_func(selector_tag_type, selenium_driver, job_title_selector=None,
+                  logging_context=logging.getLogger('GetLinkLogger')):
     if selector_tag_type == 'tag':
         return partial(by_tag_a, selenium_driver, logging_context)
     elif selector_tag_type == 'xpath':
