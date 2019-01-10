@@ -136,8 +136,7 @@ class JobDescription(object):
             matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
             logging.info('Matching keywords are: {}'.format(matching_keywords))
             return cls(url=url, title=title, keyword_matches=matching_keywords)
-        except Exception as exc:
-            print(f'exception: {exc}')
+        except NoSuchElementException as exc:
             logging.exception(msg=exc)
         return None
 
