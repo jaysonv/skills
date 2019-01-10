@@ -109,12 +109,11 @@ class JobDescription(object):
         return self.title
 
     def hasNoMatches(self):
-        return bool(self._keyword_matches)
+        return not self._keyword_matches
 
     @property
     def keyword_matches(self):
-        return 'Keyword matches: ' \
-               ', '.join('{k}: {v}'.format(k=word, v=count) for word, count in self._keyword_matches.items())
+        return ', '.join('{k}: {v}'.format(k=word, v=count) for word, count in self._keyword_matches.items())
 
     @classmethod
     def from_url(cls, url, selenium_driver, title_selector):
