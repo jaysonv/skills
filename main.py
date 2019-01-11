@@ -152,7 +152,7 @@ class JobSite(object):
         self.paging_element_selector = paging_element_selector
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.get_job_links = get_job_links.get_link_func(
-            job_link_selector_type, driver, job_descriptions_title_selector, logging)
+            job_link_selector_type, driver, job_link_selector, logging_context=logging)
 
     def launch_main_page(self):
         driver.get(self.url)
