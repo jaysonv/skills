@@ -34,8 +34,8 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 JOB_DESCRIPTION_IDENTIFIER = 'clk?jk'
 
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
-INDEED_URL = 'https://www.indeed.com/jobs?q=software+quality+assurance+engineer+%24145%2C000%2B&l=95032'
-INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
+INDEED_URL = 'https://www.indeed.com/jobs?q=software+quality&l=95032'
+INDEED_PAGING_SELECTOR = '//span[.={}]/..'
 INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
 INDEED_JOB_LINK_SELECTOR = None
 
@@ -153,9 +153,20 @@ class JobSite(object):
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.get_job_links = get_job_links.get_link_func(
             job_link_selector_type, driver, job_link_selector, logging_context=logging)
+        self.current_page = 1
 
     def launch_main_page(self):
         driver.get(self.url)
+
+    def go_to_next_page(self):
+        while True:
+            try:
+                page_element = driver.find_element_by_xpath(self.paging_element_selector.format(self.current_page+1))
+                driver.get(page_element.get_attribute('href'))
+            except NoSuchElementException:
+                return
+            self.current_page += 1
+            yield True
 
     def go_to_page(self, page_number):
         logging.info('Paging page_number is ' + str(page_number))
