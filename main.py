@@ -33,7 +33,7 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 
 JOB_DESCRIPTION_IDENTIFIER = 'clk?jk'
 
-INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
+INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '//div[@class="jobsearch-DesktopStickyContainer"]/h3[1]'
 INDEED_URL = 'https://www.indeed.com/jobs?q=software+quality&l=95032'
 INDEED_PAGING_SELECTOR = '//span[.={}]/..'
 INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
