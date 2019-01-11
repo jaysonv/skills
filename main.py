@@ -145,12 +145,12 @@ class JobDescription(object):
 class JobSite(object):
 
     def __init__(self, url, next_page_selector, job_link_selector_type, job_link_selector,
-                 job_descriptions_title_selector):
+                 job_posting_title_selector):
         self.url = url
         self.discarded_job_descriptions = set()
         self.job_postings = []
         self.next_page_selector = next_page_selector
-        self.job_descriptions_title_selector = job_descriptions_title_selector
+        self.job_posting_title_selector = job_posting_title_selector
         self.get_job_links = get_job_links.get_link_func(
             job_link_selector_type, driver, job_link_selector, logging_context=logging)
         self.current_page = 1
@@ -222,7 +222,7 @@ def go():
                      paging_element_selector=INDEED_PAGING_SELECTOR,
                      job_link_selector_type=INDEED_JOB_LINK_SELECTOR_TYPE,
                      job_link_selector=INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector=INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+                     job_posting_title_selector=INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
                      )
     indeed.process_site()
 
@@ -233,7 +233,7 @@ def go():
                             paging_element_selector=CAREER_BUILDER_PAGING_SELECTOR,
                             job_link_selector_type=CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
                             job_link_selector=CAREER_BUILDER_JOB_LINK_SELECTOR,
-                            job_descriptions_title_selector=CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
+                            job_posting_title_selector=CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
                             )
     careerbuilder.process_site()
     print('Finished')
