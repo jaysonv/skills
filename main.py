@@ -11,7 +11,7 @@ SYNONYM_MATCH_THRESHOLD = 90
 SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 100, 'sdet': 100, 'test': 70, 'automation': 70, 'engineer': 20}
 
 
-program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
+program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
                      'php', 'Sauce Labs', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
                      'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
@@ -141,7 +141,7 @@ class JobDescription(object):
             print('FAILED TO SET TITLE NoSuchElementException')
 
     def set_should_discard(self):
-        if _score_title() < SYNONYM_MATCH_THRESHOLD:
+        if self._score_title() < SYNONYM_MATCH_THRESHOLD:
             logging.info('Discarding Title: {}'.format(self.title))
             print('Discarding Title: {}'.format(self.title))
             self.should_discard = True
@@ -152,15 +152,15 @@ class JobDescription(object):
 
     def _strip_title(self):
         clean_words = ''
-        lower_title = self.title.lower
+        lower_title = self.title.lower()
         title_words = lower_title.split()
-        if title_words:
-            if STRIP_WORDS in title_words:
-                for word in title_words:
-                    for strip_it in STRIP_WORDS:
-                        index = word.find(strip_it)
-                        if index:
-                            clean_words = title_words[0:index]
+        logging.info('Title Split to: ' + str(title_words))
+        for word in title_words:
+            for strip_it in STRIP_WORDS:
+                index = word.find(strip_it)
+                if index:
+                    logging.debug('Stripping "{}" from "{}"'.format(strip_it, word))
+                    clean_words = title_words[0:index]
         logging.info('Stripped Title = ' + str(clean_words) + ' | Unstripped = ' + self.title)
         return clean_words
 
@@ -175,67 +175,6 @@ class JobDescription(object):
         logging.info('Title "{}" score: {}'.format(words_to_score, score))
         return score
 
-
-
-'''
-
-
-    def set_should_discard(self):
-        print('Discarding bad job descriptions if any')
-        set_of_title = set()
-        if self.title:
-            set_of_title.add(self.title.lower())
-        else:
-            self.should_discard = True
-        set_of_matching = set()
-        [set_of_matching.add(title.lower()) for title in JOB_TITLES]
-        match = bool(set_of_matching.intersection(set_of_title))
-        if match:
-            print('Did not discard ' + self.title)
-            logging.info('Did not discard ' + self.title)
-        else:
-            print('Discarding ' + self.title)
-            logging.info('Discarding ' + self.title)
-            self.should_discard = True
-
-
-Step 1
-  - Filter our special characters eg. '.', '(' , ')'
-  - Transfer everything to lowercase
-  - remove irrelevant words: eg: sr, senior, lead 1 , 2, II IV III, in
-  - strip out excess ' ' (white space - when removing words)
-  - remove known tech names, etc.
-  
-  - similarly remove things from, what the user is searching for such as "cloud" or "RPA" or "Selenium" 
-  
-  - Define synonyms = software engineer test = 99, quality assurance = 75, qa = 100, sdet = 100 [will be done by doing the above]
-
-- Search Algo
-  - Problem Statement:
-  - We have a set of synonyms we are searching for.
-  - We have a title that we want to select / reject. software qa engineer
-  
-  split synonyms by space and flatten the list. split title by space.
-  
-  flattenned_sysnonyms = []
-  for synonym in synonyms:
-    for word in synonym.split(" "):
-      flattened_synonyms.append(word)
-  
-  for i, word in enumerate(flattened_synonyms):
-    j = 0
-    match = 0
-    for word_t in title.split(" "):
-        if i+j < (flattenned_synonyms) and flattenned_synonyms[i+j] == word_t:
-            match = match + 1
-            j = j + 1
-        else:
-            break;
-    if match > 0:
-        print("SELECTED")
-        
-  
-'''
 
 class JobSite(object):
 
@@ -376,17 +315,17 @@ class JobSite(object):
 
 def go():
     logging.info('PROCESSING INDEED')
-    # print('PROCESSING INDEED')
-    # indeed = JobSite(
-    #                  url=INDEED_URL,
-    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
-    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
-    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-    #                  site_id = 'indeed',
-    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-    #                  )
-    # indeed.process_site()
+    print('PROCESSING INDEED')
+    indeed = JobSite(
+                     url=INDEED_URL,
+                     paging_element_selector = INDEED_PAGING_SELECTOR,
+                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
+                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+                     site_id = 'indeed',
+                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+                     )
+    indeed.process_site()
     #
     # logging.info('PROCESSING CAREER BUILDER')
     # print('PROCESSING CAREER BUILDER')
@@ -400,18 +339,18 @@ def go():
     #                         title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
     # )
     # careerbuilder.process_site()
-    logging.info('PROCESSING DICE')
-    print('PROCESSING DICE')
-    dice = JobSite(
-        url=DICE_URL,
-        paging_element_selector=DICE_PAGING_SELECTOR,
-        job_link_selector_type=DICE_JOB_LINK_SELECTOR_TYPE,
-        job_link_selector=DICE_JOB_LINK_SELECTOR,
-        job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
-        site_id='dice',
-        title_selector_type=DICE_TITLE_SELECTOR_TYPE,
-    )
-    dice.process_site()
+    # logging.info('PROCESSING DICE')
+    # print('PROCESSING DICE')
+    # dice = JobSite(
+    #     url=DICE_URL,
+    #     paging_element_selector=DICE_PAGING_SELECTOR,
+    #     job_link_selector_type=DICE_JOB_LINK_SELECTOR_TYPE,
+    #     job_link_selector=DICE_JOB_LINK_SELECTOR,
+    #     job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #     site_id='dice',
+    #     title_selector_type=DICE_TITLE_SELECTOR_TYPE,
+    # )
+    # dice.process_site()
 
     print('Finished')
 
