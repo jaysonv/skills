@@ -155,8 +155,9 @@ class JobSite(object):
             job_link_selector_type, driver, job_link_selector, logging_context=logging)
         self.current_page = 1
 
-    def launch_main_page(self):
+    def go_to_start_page(self):
         driver.get(self.url)
+        self.current_page = 1
 
     def go_to_next_page(self):
         try:
@@ -197,7 +198,7 @@ class JobSite(object):
             logging.info('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
 
     def process_site(self):
-        self.launch_main_page()
+        self.go_to_start_page()
 
         while True:
             print('Looking on page {}...'.format(self.current_page))
