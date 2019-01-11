@@ -131,7 +131,6 @@ class JobDescription(object):
             logging.info('Title is: {title}'.format(title=title))
 
             description = selenium_driver.find_element_by_tag_name('body').text
-            logging.info('Description is: {description}'.format(description=description))
 
             word_counts = Counter(description.split())
             matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
