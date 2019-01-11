@@ -150,7 +150,6 @@ class JobSite(object):
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
         self.paging_element_selector = paging_element_selector
-        self.job_link_selector_type = job_link_selector_type
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.job_link_selector = job_link_selector
         self.get_job_links = get_job_links.get_link_func(
