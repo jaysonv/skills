@@ -67,7 +67,7 @@ SITE_DICT = {
             'job_link_element_selector_type': None,
 
             'job_element_selector': None,
-            'paging_element_selector': '/html/body/div[8]/div[3]/div[2]/div[1]/div[6]/div[2]/div/ul/li[{}]/a',
+            'next_page_selector': '/html/body/div[8]/div[3]/div[2]/div[1]/div[6]/div[2]/div/ul/li[{}]/a',
             'paging_type': 'page',
             },
     'monster':
@@ -76,7 +76,7 @@ SITE_DICT = {
             'format_string': None,
             'job_link_element_selector_type': None,  # NEED TO BE "PAGED    "
             'job_element_selector': None,
-            'paging_element_selector': '//*[@id="loadMoreJobs"]',
+            'next_page_selector': '//*[@id="loadMoreJobs"]',
             'paging_type': 'button',
 
         },
@@ -86,7 +86,7 @@ SITE_DICT = {
             'format_string': None,
             'job_link_element_selector_type': None,
             'job_element_selector': None,
-            'paging_element_selector': '/html/body/div[3]/div/div/div/div[1]/div/div[2]/section/article/div/div[3]/div[2]/div/div/ul/li[{}]/a',
+            'next_page_selector': '/html/body/div[3]/div/div/div/div[1]/div/div[2]/section/article/div/div[3]/div[2]/div/div/ul/li[{}]/a',
             'paging_type': 'page',
             },
     'linked_in':
@@ -95,7 +95,7 @@ SITE_DICT = {
             'format_string': None,
             'job_link_element_selector_type': None,
             'job_element_selector': None,
-            'paging_element_selector': '//*[@id="ember975"]/li/ol/li[{}]/button',
+            'next_page_selector': '//*[@id="ember975"]/li/ol/li[{}]/button',
             'paging_type': 'page',  # yes, page!
             },
 '''
@@ -145,11 +145,11 @@ class JobDescription(object):
 class JobSite(object):
 
     def __init__(self,
-                 url, paging_element_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector):
+                 url, next_page_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector):
         self.url = url
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
-        self.paging_element_selector = paging_element_selector
+        self.next_page_selector = next_page_selector
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.get_job_links = get_job_links.get_link_func(
             job_link_selector_type, driver, job_link_selector, logging_context=logging)
@@ -161,7 +161,7 @@ class JobSite(object):
 
     def go_to_next_page(self):
         try:
-            page_element = driver.find_element_by_xpath(self.paging_element_selector.format(self.current_page+1))
+            page_element = driver.find_element_by_xpath(self.next_page_selector.format(self.current_page + 1))
             driver.get(page_element.get_attribute('href'))
         except NoSuchElementException as exc:
             logging.exception(msg='{}, likely reached end of pages.'.format(exc))
