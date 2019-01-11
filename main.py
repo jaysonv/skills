@@ -6,31 +6,29 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 import logging
 
-JOB_TITLES = ['Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
-              'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
-              'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet', 'Sr. QA Engineer, NMS/Data Analytics (34054)'
-              'software development engineer in test', 'Sr QA Automation Engineer -Cloud', 'QA Lead - RPA', 'Software Engineer, Mobile QA Automation',
-              'software test engineer', 'software test automation', 'qa automation', 'Senior QA Engineer', 'QA Automation Manager', 'Senior Mobile QA Engineer',
-              'software quality assurance engineer', 'QA Automation Engineer', 'Senior QA Test and Automation Engineer', 'Sr. Quality Assurance Specialist', 'QA Automation Lead',
-                'Sr. Director, Quality Assurance', 'Sr. QA Automation Engineer (Python)', 'Software QA Engineer', 'QA Engineer (Automation)', 'Senior QA Automation Engineer',
-              'Staff QA Engineer', 'QA Lead (Mobile and Backend)', 'QA Automation with python/cloud', 'Senior Software QA Engineer - Selenium',
-              ]
+SYNONYM_MATCH_THRESHOLD = 90
 
-program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
+SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 100, 'sdet': 100, 'test': 70, 'automation': 70, 'engineer': 20}
+
+
+program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
                      'php', 'Sauce Labs', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
                      'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
                 'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend']
-databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle db',
-             'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white',
+databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle',
+             'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white', 'telecommunications',
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
              'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'Acceptance', 'uat', 'healthcare', 'banking']
+         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking']
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
+STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'manager', 'lead', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
+for i in range(0,9):
+    STRIP_WORDS.append('{}'.format(i))
 
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
@@ -142,24 +140,42 @@ class JobDescription(object):
             logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector)
             print('FAILED TO SET TITLE NoSuchElementException')
 
-
     def set_should_discard(self):
-        print('Discarding bad job descriptions if any')
-        set_of_title = set()
-        if self.title:
-            set_of_title.add(self.title.lower())
-        else:
+        if self._score_title() < SYNONYM_MATCH_THRESHOLD:
+            logging.info('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
+            print('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
             self.should_discard = True
-        set_of_matching = set()
-        [set_of_matching.add(title.lower()) for title in JOB_TITLES]
-        match = bool(set_of_matching.intersection(set_of_title))
-        if match:
-            print('Did not discard ' + self.title)
-            logging.info('Did not discard ' + self.title)
         else:
-            print('Discarding ' + self.title)
-            logging.info('Discarding ' + self.title)
-            self.should_discard = True
+            print('Keeping title: {} with score {}'.format(self.title, self._score_title()))
+            logging.info('Keeping title: {} with score {}'.format(self.title, self._score_title()))
+
+
+    def _strip_title(self):
+        clean_words = ''
+        lower_title = self.title.lower()
+        title_words = lower_title.split()
+        logging.info('Title Split to: ' + str(title_words))
+        for word in title_words:
+            for strip_it in STRIP_WORDS:
+                index = word.find(strip_it)
+                if index:
+                    logging.debug('Stripping "{}" from "{}"'.format(strip_it, word))
+                    clean_words = title_words[0:index]
+        logging.info('Stripped Title = ' + str(clean_words) + ' | Unstripped = ' + self.title)
+        return clean_words
+
+
+    def _score_title(self):
+        words_to_score = self._strip_title()
+        score = 0
+        for key, value in SYNONYMS.items():
+            for word in words_to_score:
+                if word == key:
+                    score += value
+                    logging.info('Keyword match found: {} value: {}'.format(key, value))
+        logging.info('Title "{}" score: {}'.format(words_to_score, score))
+        return score
+
 
 class JobSite(object):
 
@@ -231,7 +247,7 @@ class JobSite(object):
 
     def clean(self, links):
         if self.site_id == 'indeed':
-            logging.info('Cleaning links')
+            logging.info('Cleaning {} links'.format(self.site_id))
             clean_links = []
             clean_links += [link for link in links if 'clk?jk' in link]  #unique identifier for links on indeed to job descriptions = 'clk?jk'
             logging.debug('Clean links : ' + str(clean_links))
@@ -290,27 +306,16 @@ class JobSite(object):
                 job_description.set_should_discard()
                 if job_description.should_discard:
                     self.discard_unmatched_job_descriptions()
-                    logging.info('discard_unmatched_job_descriptions added these job descriptions : \n' + str([jd.title + ',' for jd in self.discarded_job_descriptions]))
                 else:
                     job_description.match_keywords()
         self.file_results()
 
     def get_links_by_class(self):
         pass
-        # try:
-        #     links = []
-        #     print('Finding link elements')
-        #     elements = driver.find_elements_by_class_name(class_name)
-        #     print('Extracting links')
-        #     for element in elements:
-        #         links += element.get_attribute('href')
-        #     logging.info('Returning links: ' + [link + ', ' for link in links])
-        #     return links
-        # except NoSuchElementException:
-        #     print('NoSuchElementException')
+
 
 def go():
-    logging.info('PROCESSING INDEED')
+    # logging.info('PROCESSING INDEED')
     # print('PROCESSING INDEED')
     # indeed = JobSite(
     #                  url=INDEED_URL,
@@ -335,18 +340,18 @@ def go():
     #                         title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
     # )
     # careerbuilder.process_site()
-    logging.info('PROCESSING DICE')
-    print('PROCESSING DICE')
-    dice = JobSite(
-        url=DICE_URL,
-        paging_element_selector=DICE_PAGING_SELECTOR,
-        job_link_selector_type=DICE_JOB_LINK_SELECTOR_TYPE,
-        job_link_selector=DICE_JOB_LINK_SELECTOR,
-        job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
-        site_id='dice',
-        title_selector_type=DICE_TITLE_SELECTOR_TYPE,
-    )
-    dice.process_site()
+    # logging.info('PROCESSING DICE')
+    # print('PROCESSING DICE')
+    # dice = JobSite(
+    #     url=DICE_URL,
+    #     paging_element_selector=DICE_PAGING_SELECTOR,
+    #     job_link_selector_type=DICE_JOB_LINK_SELECTOR_TYPE,
+    #     job_link_selector=DICE_JOB_LINK_SELECTOR,
+    #     job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #     site_id='dice',
+    #     title_selector_type=DICE_TITLE_SELECTOR_TYPE,
+    # )
+    # dice.process_site()
 
     print('Finished')
 
