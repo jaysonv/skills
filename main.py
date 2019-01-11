@@ -10,18 +10,17 @@ SYNONYM_MATCH_THRESHOLD = 90
 
 SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 100, 'sdet': 100, 'test': 70, 'automation': 70, 'engineer': 20}
 
-
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
                      'php', 'Sauce Labs', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
                      'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
-                'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend']
+                'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend', 'cloud',]
 databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle',
              'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white', 'telecommunications',
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
-             'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui']
+             'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui', 'virtual', 'vmware']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
          'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking']
 
@@ -29,6 +28,13 @@ KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + o
 STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'manager', 'lead', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
 for i in range(0,9):
     STRIP_WORDS.append('{}'.format(i))
+
+
+summary_dict = {}
+for key in KEY_WORDS:
+    summary_dict[key] = 0
+
+
 
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
@@ -43,7 +49,6 @@ CAREER_BUILDER_PAGING_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[2]/
 CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
 CAREER_BUILDER_TITLE_SELECTOR_TYPE = 'css_selector'
-
 
 
 DICE_URL = 'https://www.dice.com/jobs/q-Software_QA_Engineer-jtype-Full+Time-l-Santa_Clara%2C_CA-radius-50-jobs'
@@ -255,6 +260,12 @@ class JobSite(object):
         else:
             self.job_descriptions += [JobDescription(link) for link in links]
 
+    def get_totals(self):
+        for job in self.job_descriptions:
+            for key, value in job.per_title_match_dict[job.title].items():
+                summary_dict[key] += value
+
+
     def file_results(self):
             output_filename = 'job_output.txt'
             with open(output_filename, 'a') as file:
@@ -314,19 +325,21 @@ class JobSite(object):
         pass
 
 
+
+
 def go():
-    # logging.info('PROCESSING INDEED')
-    # print('PROCESSING INDEED')
-    # indeed = JobSite(
-    #                  url=INDEED_URL,
-    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
-    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
-    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-    #                  site_id = 'indeed',
-    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-    #                  )
-    # indeed.process_site()
+    logging.info('PROCESSING INDEED')
+    print('PROCESSING INDEED')
+    indeed = JobSite(
+                     url=INDEED_URL,
+                     paging_element_selector = INDEED_PAGING_SELECTOR,
+                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
+                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+                     site_id = 'indeed',
+                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+                     )
+    indeed.process_site()
     #
     # logging.info('PROCESSING CAREER BUILDER')
     # print('PROCESSING CAREER BUILDER')
@@ -359,4 +372,11 @@ def go():
 MAIN
 '''
 go()
+summary_string = '\n\n************************************************\n'
+summary_string +='                  SUMMARY'
+summary_string += '\n************************************************\n'
+summary_string += str([(key, value) for key, value in summary_dict.items() if value > 0])
+
+print(summary_string)
+logging.info(summary_string)
 driver.close()
