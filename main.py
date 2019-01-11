@@ -1,5 +1,5 @@
 from collections import defaultdict, Counter
-import get_links
+import get_job_links
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from datetime import datetime
@@ -153,6 +153,8 @@ class JobSite(object):
         self.job_link_selector_type = job_link_selector_type
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.job_link_selector = job_link_selector
+        self.get_job_links = get_job_links.get_link_func(
+            job_link_selector_type, driver, job_descriptions_title_selector, logging)
 
     def launch_main_page(self):
         driver.get(self.url)
@@ -180,11 +182,11 @@ class JobSite(object):
                 self.discarded_job_descriptions.add(job)
         self.job_descriptions = list(set(self.job_descriptions) ^ self.discarded_job_descriptions)
 
-    def filter_links(self, links):
-        logging.info('Cleaning links')
+    def filter_links_by_identifier(self, links):
+        logging.info('Filtering links for identifier: ' + JOB_DESCRIPTION_IDENTIFIER)
         clean_links = [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
-        logging.debug('Clean links : ' + str(clean_links))
-        self.job_descriptions += [JobDescription.from_url(link, driver, self.job_descriptions_title_selector) for link in clean_links]
+        logging.debug('Filtered links: ' + str(clean_links))
+        return clean_links
 
     def output_results(self):
         with open(JOB_OUTPUT_FILENAME, 'w') as file:
@@ -208,19 +210,11 @@ class JobSite(object):
         for page_number in range(1):
             if page_number >= 1:
                 self.go_to_page(page_number)
-            # Get links by selector type
-            if self.job_link_selector_type == 'tag':
-                self.filter_links(get_links.by_tag_a(
-                    selenium_driver=driver, logging_context=logging))
-            elif self.job_link_selector_type == 'xpath':
-                self.filter_links(get_links.by_xpath(
-                    selenium_driver=driver, selector=self.job_descriptions_title_selector, logging_context=logging))
-            elif self.job_link_selector_type == 'class':
-                self.filter_links(get_links.by_class())
-            else:
-                logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type))
-
-            self.discard_unmatched_job_descriptions()
+            links = self.filter_links_by_identifier(self.get_job_links())
+            for link in links:
+                self.job_descriptions.append(
+                    JobDescription.from_url(link, driver, self.job_descriptions_title_selector))
+        self.discard_unmatched_job_descriptions()
         self.output_results()
 
 def go():
