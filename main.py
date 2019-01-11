@@ -151,7 +151,6 @@ class JobSite(object):
         self.job_descriptions = []
         self.paging_element_selector = paging_element_selector
         self.job_descriptions_title_selector = job_descriptions_title_selector
-        self.job_link_selector = job_link_selector
         self.get_job_links = get_job_links.get_link_func(
             job_link_selector_type, driver, job_descriptions_title_selector, logging)
 
