@@ -315,18 +315,18 @@ class JobSite(object):
 
 
 def go():
-    logging.info('PROCESSING INDEED')
-    print('PROCESSING INDEED')
-    indeed = JobSite(
-                     url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR,
-                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-                     site_id = 'indeed',
-                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-                     )
-    indeed.process_site()
+    # logging.info('PROCESSING INDEED')
+    # print('PROCESSING INDEED')
+    # indeed = JobSite(
+    #                  url=INDEED_URL,
+    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
+    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
+    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #                  site_id = 'indeed',
+    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+    #                  )
+    # indeed.process_site()
     #
     # logging.info('PROCESSING CAREER BUILDER')
     # print('PROCESSING CAREER BUILDER')
