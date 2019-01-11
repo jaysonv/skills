@@ -19,11 +19,11 @@ analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
                 'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend']
 databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle',
-             'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white',
+             'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white', 'telecommunications',
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
              'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui']
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'Acceptance', 'uat', 'healthcare', 'banking']
+         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking']
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
 STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'manager', 'lead', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
@@ -142,12 +142,12 @@ class JobDescription(object):
 
     def set_should_discard(self):
         if self._score_title() < SYNONYM_MATCH_THRESHOLD:
-            logging.info('Discarding Title: {}'.format(self.title))
-            print('Discarding Title: {}'.format(self.title))
+            logging.info('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
+            print('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
             self.should_discard = True
         else:
-            print('Keeping title: {}'.format(self.title))
-            logging.info('Keeping title: {}'.format(self.title))
+            print('Keeping title: {} with score {}'.format(self.title, self._score_title()))
+            logging.info('Keeping title: {} with score {}'.format(self.title, self._score_title()))
 
 
     def _strip_title(self):
@@ -172,6 +172,7 @@ class JobDescription(object):
             for word in words_to_score:
                 if word == key:
                     score += value
+                    logging.info('Keyword match found: {} value: {}'.format(key, value))
         logging.info('Title "{}" score: {}'.format(words_to_score, score))
         return score
 
