@@ -135,6 +135,7 @@ class JobDescription(object):
             word_counts = Counter(description.split())
             matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
             logging.info('Matching keywords are: {}'.format(matching_keywords))
+            driver.back()
             return cls(url=url, title=title, keyword_matches=matching_keywords)
         except NoSuchElementException as exc:
             logging.exception(msg=exc)
@@ -158,30 +159,14 @@ class JobSite(object):
         driver.get(self.url)
 
     def go_to_next_page(self):
-        while True:
-            try:
-                page_element = driver.find_element_by_xpath(self.paging_element_selector.format(self.current_page+1))
-                driver.get(page_element.get_attribute('href'))
-            except NoSuchElementException:
-                return
-            self.current_page += 1
-            yield True
-
-    def go_to_page(self, page_number):
-        logging.info('Paging page_number is ' + str(page_number))
         try:
-            if page_number >= 1:
-                driver.find_element_by_xpath(self.paging_element_selector.format(page_number)).click()
-                logging.info('Page by clicking ' + self.paging_element_selector.format(page_number))
-            else:
-                driver.find_element_by_xpath(self.paging_element_selector).click()
-                logging.info('Page by clicking ' + self.paging_element_selector)
-            print('Paging / clicking "Load More.."')
-        except NoSuchElementException:
-            print('NoSuchElementException - which might be expected')
-            logging.warning('NoSuchElementException - which might be expected')
-        except ElementClickInterceptedException:
-            logging.warning('ElementClickInterceptedException for page_number ' + str(page_number))
+            page_element = driver.find_element_by_xpath(self.paging_element_selector.format(self.current_page+1))
+            driver.get(page_element.get_attribute('href'))
+        except NoSuchElementException as exc:
+            logging.exception(msg='{}, likely reached end of pages.'.format(exc))
+            return False
+        self.current_page += 1
+        return True
 
     def discard_unmatched_job_descriptions(self):
         for job in self.job_descriptions:
@@ -214,14 +199,17 @@ class JobSite(object):
     def process_site(self):
         self.launch_main_page()
 
-        #TODO, change back to 6
-        for page_number in range(1):
-            if page_number >= 1:
-                self.go_to_page(page_number)
+        while True:
+            print('Looking on page {}...'.format(self.current_page))
+            logging.info('Looking on page {}...'.format(self.current_page))
+
             links = self.filter_links_by_identifier(self.get_job_links())
             for link in links:
                 self.job_descriptions.append(
                     JobDescription.from_url(link, driver, self.job_descriptions_title_selector))
+            if not self.go_to_next_page():
+                break
+
         self.discard_unmatched_job_descriptions()
         self.output_results()
 
