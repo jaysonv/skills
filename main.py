@@ -144,11 +144,11 @@ class JobDescription(object):
 
 class JobSite(object):
 
-    def __init__(self,
-                 url, next_page_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector):
+    def __init__(self, url, next_page_selector, job_link_selector_type, job_link_selector,
+                 job_descriptions_title_selector):
         self.url = url
         self.discarded_job_descriptions = set()
-        self.job_descriptions = []
+        self.job_postings = []
         self.next_page_selector = next_page_selector
         self.job_descriptions_title_selector = job_descriptions_title_selector
         self.get_job_links = get_job_links.get_link_func(
@@ -170,11 +170,11 @@ class JobSite(object):
         return True
 
     def discard_unmatched_job_descriptions(self):
-        for job in self.job_descriptions:
+        for job in self.job_postings:
             if job is None or job.hasNoMatches():
                 logging.info('Adding {title} to discard list'.format(title=job))
                 self.discarded_job_descriptions.add(job)
-        self.job_descriptions = list(set(self.job_descriptions) ^ self.discarded_job_descriptions)
+        self.job_postings = list(set(self.job_postings) ^ self.discarded_job_descriptions)
 
     def filter_links_by_identifier(self, links):
         logging.info('Filtering links for identifier: ' + JOB_DESCRIPTION_IDENTIFIER)
@@ -189,8 +189,8 @@ class JobSite(object):
                 file.write('{}\n'.format(job))
 
             print('-----------------------------')
-            print('MATCHING JOB TITLES (TOTAL {})'.format(len(self.job_descriptions)))
-            for job in self.job_descriptions:
+            print('MATCHING JOB TITLES (TOTAL {})'.format(len(self.job_postings)))
+            for job in self.job_postings:
                 print(job)
                 print('Keyword matches: {}'.format(job.keyword_matches))
                 print('===============================')
@@ -206,7 +206,7 @@ class JobSite(object):
 
             links = self.filter_links_by_identifier(self.get_job_links())
             for link in links:
-                self.job_descriptions.append(
+                self.job_postings.append(
                     JobDescription.from_url(link, driver, self.job_descriptions_title_selector))
             if not self.go_to_next_page():
                 break
