@@ -1,6 +1,6 @@
 import logging
 from selenium.common.exceptions import NoSuchElementException
-from utility import get_link_finder_func, log_result
+from utility import get_href_finder_func, log_result
 
 
 class JobPostingLinkCrawler(object):
@@ -20,12 +20,12 @@ class JobPostingLinkCrawler(object):
         self._current_page = 1
         self._use_solitary_paging = site_config['use_solitary_paging']
 
-        self._get_job_links_on_page = get_link_finder_func(
-            site_config['job_link_selector_type'], self._selenium_driver,
-            site_config['job_link_selector'])
-        self._get_next_page_link = get_link_finder_func(
-            site_config['next_page_selector_type'], self._selenium_driver,
-            site_config['next_page_selector'], single_link=True)
+        self._get_job_links_on_page = get_href_finder_func(
+            self._selenium_driver, site_config['job_link_selector'],
+            site_config['job_link_selector_type'])
+        self._get_next_page_link = get_href_finder_func(
+            self._selenium_driver, site_config['next_page_selector'],
+            site_config['next_page_selector_type'], single_link=True)
 
     @log_result
     def start(self):
