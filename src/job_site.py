@@ -69,9 +69,12 @@ class JobSite(object):
         "expanding" results behaviour.
         :return: List of job posting hrefs.
         """
+        logger = logging.getLogger(__class__.__name__)
         self.go_to_start_page()
         job_posting_links = []
         while True:
+            print('Looking on page {}...'.format(self.current_page))
+            logger.info('Looking on page {}...'.format(self.current_page))
             if solitary_pages:
                 job_posting_links.extend(self.get_job_links())
             if not self.go_to_next_page():
@@ -81,17 +84,9 @@ class JobSite(object):
         return job_posting_links
 
     def process_site(self):
-        self.go_to_start_page()
-        while True:
-            print('Looking on page {}...'.format(self.current_page))
-            logging.info('Looking on page {}...'.format(self.current_page))
-
-            links = self.get_job_links()
-            for link in links:
-                self.job_postings.append(
-                    JobDescription.from_url(link, self.selenium_driver, self.job_posting_title_selector))
-            if not self.go_to_next_page():
-                break
-
+        links = self.get_job_post_links()
+        for link in links:
+            self.job_postings.append(
+                JobDescription.from_url(link, self.selenium_driver, self.job_posting_title_selector))
         self.discard_unmatched_job_descriptions()
         self.output_results()
