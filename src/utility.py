@@ -13,6 +13,15 @@ def log_result(func):
     return wrapper
 
 
+def get_element_from_selector(selenium_get_func, selector):
+    @log_result
+    @wraps(selenium_get_func)
+    def wrapper(formatters=None):
+        formatters = formatters or []
+        return selenium_get_func(selector.format(*formatters))
+    return wrapper
+
+
 def get_href_from_selector(selenium_get_func, selector):
     @log_result
     @wraps(selenium_get_func)
@@ -46,6 +55,15 @@ def get_link_finder_func(selector_tag_type, selenium_driver, selector, single_li
         if single_link:
             return get_href_from_selector(selenium_driver.find_element_by_css_selector, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_css_selector, selector)
+
+
+def get_element_finder_func(selector_tag_type, selenium_driver, selector):
+    if selector_tag_type == 'tag':
+        return get_element_from_selector(selenium_driver.find_element_by_tag, selector)
+    if selector_tag_type == 'xpath':
+        return get_element_from_selector(selenium_driver.find_element_by_xpath, selector)
+    if selector_tag_type == 'css':
+        return get_element_from_selector(selenium_driver.find_elements_by_css_selector, selector)
 
 
 def make_date_string():
