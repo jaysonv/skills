@@ -44,13 +44,12 @@ class JobPostingParser(object):
         self._selenium_driver = selenium_driver
         self._job_output_path = job_output_path
 
-        self._get_job_posting_title = get_element_finder_func(
-            site_config['job_posting_title_selector_type'], selenium_driver,
-            site_config['job_posting_title_selector'])
-        self._get_job_posting_description = get_element_finder_func(
-            site_config['job_posting_description_selector_type'], selenium_driver,
-            site_config['job_posting_description_selector']
-        )
+        self._get_job_posting_title_element = get_element_finder_func(
+            selenium_driver, site_config['job_posting_title_selector'],
+            site_config['job_posting_title_selector_type'])
+        self._get_job_posting_description_element = get_element_finder_func(
+            selenium_driver, site_config['job_posting_description_selector'],
+            site_config['job_posting_description_selector_type'])
 
     def start(self, job_posting_links):
         for link in job_posting_links:
@@ -88,10 +87,10 @@ class JobPostingParser(object):
             log.info('Getting job post at: {url}'.format(url=url))
             self._selenium_driver.get(url)
 
-            title = self._get_job_posting_title()
+            title = self._get_job_posting_title_element().text
             log.info('Title is: {title}'.format(title=title))
 
-            description = self._get_job_posting_description()
+            description = self._get_job_posting_description_element().text
 
             word_counts = Counter(description.split())
             matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
