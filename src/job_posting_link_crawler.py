@@ -6,7 +6,7 @@ from utility import get_link_finder_func, log_result
 
 
 class JobPostingLinkCrawler(object):
-    def __init__(self, **site_config):
+    def __init__(self, selenium_driver, **site_config):
         """
         :param site_config:
             * search_start_url: str
@@ -17,8 +17,7 @@ class JobPostingLinkCrawler(object):
             * use_solitary_paging: bool
         """
         self.found_links = []
-        self._selenium_driver = webdriver.Firefox(service_log_path='../logs/geckodriver.log')
-        self._selenium_driver.set_window_position(-2000, -2000)
+        self._selenium_driver = selenium_driver
         self._selenium_driver.get(site_config['search_start_url'])
         self._current_page = 1
         self._use_solitary_paging = site_config['use_solitary_paging']
@@ -29,14 +28,6 @@ class JobPostingLinkCrawler(object):
         self._get_next_page_link = get_link_finder_func(
             site_config['next_page_selector_type'], self._selenium_driver,
             site_config['next_page_selector'], single_link=True)
-
-    def __enter__(self):
-        signal.signal(signal.SIGTERM, self._cleanup)
-        signal.signal(signal.SIGINT, self._cleanup)
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        self._cleanup()
 
     @log_result
     def start(self):
@@ -53,11 +44,7 @@ class JobPostingLinkCrawler(object):
                 break
         if not self._use_solitary_paging:
             self.found_links.extend(self._get_job_links_on_page())
-        self._cleanup()
         return self.found_links
-
-    def _cleanup(self, *args):
-        self._selenium_driver.quit()
 
     def _go_to_next_page(self):
         try:
