@@ -33,7 +33,7 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 logging.basicConfig(filename='../logs/execution_{date}.log'.format(date=make_date_string()), level=logging.INFO)
 
 
-class JobDescription(object):
+class JobPosting(object):
     def __init__(self, url, title, description=None, keyword_matches=None):
         self.url = url
         self.title = title
