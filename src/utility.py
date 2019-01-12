@@ -13,11 +13,22 @@ def log_result(func):
     return wrapper
 
 
-def get_hrefs_from_selector(selenium_get_func, *args, **kwargs):
+def get_href_from_selector(selenium_get_func, selector):
     @log_result
     @wraps(selenium_get_func)
-    def wrapper():
-        elements = selenium_get_func(*args, **kwargs)
+    def wrapper(formatters=None):
+        formatters = formatters or []
+        element = selenium_get_func(selector.format(*formatters))
+        return element.get_attribute('href')
+    return wrapper
+
+
+def get_hrefs_from_selector(selenium_get_func, selector):
+    @log_result
+    @wraps(selenium_get_func)
+    def wrapper(formatters=None):
+        formatters = formatters or []
+        elements = selenium_get_func(selector.format(*formatters))
         return [element.get_attribute('href') for element in elements]
     return wrapper
 
@@ -25,15 +36,15 @@ def get_hrefs_from_selector(selenium_get_func, *args, **kwargs):
 def get_link_finder_func(selector_tag_type, selenium_driver, selector, single_link=False):
     if selector_tag_type == 'tag':
         if single_link:
-            return get_hrefs_from_selector(selenium_driver.find_element_by_tag_name, selector)
+            return get_href_from_selector(selenium_driver.find_element_by_tag_name, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_tag_name, selector)
     elif selector_tag_type == 'xpath':
         if single_link:
-            return get_hrefs_from_selector(selenium_driver.find_element_by_xpath, selector)
+            return get_href_from_selector(selenium_driver.find_element_by_xpath, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_xpath, selector)
     elif selector_tag_type == 'css':
         if single_link:
-            return get_hrefs_from_selector(selenium_driver.find_element_by_css_selector, selector)
+            return get_href_from_selector(selenium_driver.find_element_by_css_selector, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_css_selector, selector)
 
 
