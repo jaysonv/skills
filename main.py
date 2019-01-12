@@ -269,8 +269,8 @@ class JobSite(object):
     def file_results(self):
             output_filename = 'job_output.txt'
             with open(output_filename, 'a') as file:
-                file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
                 write_string = ''
+                write_string += 'DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
                 for jd in self.discarded_job_descriptions:
                     write_string += jd.title + '\n'
                 write_string += '\n----------------------------------------------\n'
