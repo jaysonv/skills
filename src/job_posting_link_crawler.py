@@ -5,7 +5,7 @@ import signal
 from utility import get_link_finder_func, log_result
 
 
-class JobPostLinkCrawler(object):
+class JobPostingLinkCrawler(object):
     def __init__(self, **site_config):
         """
         :param site_config:
