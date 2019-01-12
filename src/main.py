@@ -5,12 +5,13 @@ import signal
 from utility import make_date_string
 
 
-
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '//div[@class="jobsearch-DesktopStickyContainer"]/h3[1]'
+INDEED_JOB_DESCRIPTION_TITLE_SELECTOR_TYPE = ''
 INDEED_URL = 'https://www.indeed.com/jobs?q=software+quality&l=95032'
 INDEED_PAGING_SELECTOR = '//span[.={}]/..'
-INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
-INDEED_JOB_LINK_SELECTOR = None
+INDEED_PAGING_SELECTOR_TYPE = 'xpath'
+INDEED_JOB_LINK_SELECTOR = 'a[class="jobtitle turnstileLink"]'
+INDEED_JOB_LINK_SELECTOR_TYPE = 'css'
 
 
 CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
@@ -69,7 +70,6 @@ SITE_DICT = {
             },
 '''
 
-
 def main():
     logging.info('PROCESSING INDEED')
     print('PROCESSING INDEED')
@@ -77,6 +77,7 @@ def main():
                      selenium_driver=driver,
                      url=INDEED_URL,
                      next_page_selector=INDEED_PAGING_SELECTOR,
+                     next_page_selector_type=INDEED_PAGING_SELECTOR_TYPE,
                      job_link_selector_type=INDEED_JOB_LINK_SELECTOR_TYPE,
                      job_link_selector=INDEED_JOB_LINK_SELECTOR,
                      job_posting_title_selector=INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
@@ -89,6 +90,7 @@ def main():
                             selenium_driver=driver,
                             url=CAREER_BUILDER_URL,
                             next_page_selector=CAREER_BUILDER_PAGING_SELECTOR,
+                            next_page_selector_type=INDEED_PAGING_SELECTOR_TYPE,
                             job_link_selector_type=CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
                             job_link_selector=CAREER_BUILDER_JOB_LINK_SELECTOR,
                             job_posting_title_selector=CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
