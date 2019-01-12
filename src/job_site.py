@@ -13,8 +13,9 @@ class JobSite(object):
     def __init__(self, selenium_driver, url, next_page_selector, next_page_selector_type, job_link_selector_type, job_link_selector,
                  job_posting_title_selector):
         self.selenium_driver = selenium_driver
-        self.url = url
+        self.selenium_driver.get(url)
         self.current_page = 1
+
         self.discarded_job_descriptions = set()
         self.job_postings = []
 
@@ -26,10 +27,6 @@ class JobSite(object):
             job_link_selector_type, selenium_driver, job_link_selector)
         self.get_next_page_link = get_link_finder_func(
             next_page_selector_type, selenium_driver, next_page_selector, single_link=True)
-
-    def go_to_start_page(self):
-        self.selenium_driver.get(self.url)
-        self.current_page = 1
 
     def _go_to_next_page(self):
         try:
@@ -73,7 +70,6 @@ class JobSite(object):
         :return: List of job posting hrefs.
         """
         logger = logging.getLogger(__class__.__name__)
-        self.go_to_start_page()
         job_posting_links = []
         while True:
             print('Looking on page {}...'.format(self.current_page))
