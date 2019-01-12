@@ -2,6 +2,7 @@ from get_job_links import get_link_func
 from job_description import JobDescription
 import logging
 from selenium.common.exceptions import NoSuchElementException
+from utility import log_result
 
 
 JOB_DESCRIPTION_IDENTIFIER = 'clk?jk'
@@ -19,7 +20,7 @@ class JobSite(object):
         self.next_page_selector = next_page_selector
         self.job_posting_title_selector = job_posting_title_selector
         self.get_job_links = get_link_func(
-            job_link_selector_type, selenium_driver, job_link_selector, logging_context=logging)
+            job_link_selector_type, selenium_driver, job_link_selector)
         self.current_page = 1
 
     def go_to_start_page(self):
@@ -43,11 +44,9 @@ class JobSite(object):
                 self.discarded_job_descriptions.add(job)
         self.job_postings = list(set(self.job_postings) ^ self.discarded_job_descriptions)
 
+    @log_result
     def filter_links_by_identifier(self, links):
-        logging.info('Filtering links for identifier: ' + JOB_DESCRIPTION_IDENTIFIER)
-        clean_links = [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
-        logging.debug('Filtered links: ' + str(clean_links))
-        return clean_links
+        return [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
 
     def output_results(self):
         with open(JOB_OUTPUT_FILENAME, 'w') as file:
