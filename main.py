@@ -12,20 +12,20 @@ SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 10
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
                      'php', 'sauce', 'flask', 'shell', 'nas', 'san', 'iscsi', 'scripts', 'scripting',
-                     'junit', 'selenium', 'react', 'c#', 'testrail', 'confluence', 'jmeter']
-analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
-                     'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
+                     'junit', 'selenium', 'react', 'c#', 'testrail', 'confluence', 'jmeter', 'wifi',]
+analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'wireless', 'saas', 'pandas', 'numpy', 'jenkins', 'scipy', 'plan', 'case',
+                     'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance',]
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
-                'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend', 'cloud',]
+                'elasticsearch', 'api', 'Mockito', 'Robotium', 'frontend', 'backend', 'cloud', 'tdd', 'driven', 'bdd']
 databases = ['sql', 'nosql', 'hbase', 'cassandra', 'xml', 'rust', 'mongodb', 'mysql', 'mssql', 'postgre', 'oracle',
              'rdbms', 'mobile', 'android', 'ios', 'cucumber', 'iot', 'black', 'white', 'telecommunications',
              'hive', 'cucumber', 'aws', 'azure', 'amazon', 'google', 'rest', 'docker', 'container', 'puppet', 'chef',
-             'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui', 'virtual', 'vmware']
+             'kubernetes', 'storage', 'network', 'networking', 'maven', 'ci', 'cd', 'ci/cd', 'gui', 'virtual', 'vmware',]
 other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net', 'angular', 'node.js', 'kafka', 'mesos',
-         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking']
+         'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking',]
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
-STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'enterprise', 'architect', 'manager', 'lead','&', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
+STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'enterprise', 'architect', 'manager', 'lead','&', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics',]
 for i in range(0,9):
     STRIP_WORDS.append('{}'.format(i))
 
@@ -61,9 +61,12 @@ MONSTER_URL = 'https://www.monster.com/jobs/search/Full-Time_8?q=software-qualit
 MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/main/div[1]/header/div[2]/h1'
 MONSTER_PAGING_SELECTOR = '//*[@id="loadMoreJobs"]'
 MONSTER_JOB_LINK_SELECTOR_TYPE = 'xpath'
-MONSTER_JOB_LINK_SELECTOR = '/html/body/div[2]/main/div[1]/div[1]/div/div[1]/div/div/section[1]/div/div[2]/header/h2/a'
+MONSTER_JOB_LINK_SELECTOR = '/html/body/div[2]/main/div[1]/div[1]/div/div[1]/div/div/section[{}]/div/div[2]/header/h2/a'
 MONSTER_TITLE_SELECTOR_TYPE = 'xpath'
-
+'''
+/html/body/div[1]/main/div[3]/div[1]/div/section/div[2]/span/p[1]/strong
+/html/body/div[2]/main/div[1]/header/div[2]/h1
+'''
 
 driver = webdriver.Firefox()
 driver.set_window_position(-2000, -2000)
@@ -93,7 +96,7 @@ class JobDescription(object):
 
     def _parse_body_text(self):
         if self.title:
-            logging.info('Parsing job description for ' + self.title)
+            logging.info('Parsing job description for ' + self.title +'\nURL: ' + self.url)
             print('Parsing job description for ' + self.title)
             try:
                 body_text = driver.find_element_by_tag_name('body').text
@@ -110,7 +113,7 @@ class JobDescription(object):
         for key in KEY_WORDS:
             keydict[key.lower()] = 0
         parsed_body = self._parse_body_text()
-        logging.info('Matching keywords for ' + self.title)
+        logging.info('Matching keywords for ' + self.title +'\nURL: ' + self.url)
         print('Matching keywords for ' + self.title)
         for word in parsed_body:
             for key in KEY_WORDS:
@@ -139,22 +142,22 @@ class JobDescription(object):
 
             if title and (title.islower() or title.isupper()) and title != ' ':
                 self.title = title.lower()
-                logging.info('Setting title ' + self.title)
+                logging.info('Setting title ' + self.title +'\nURL: ' + self.url)
                 print('Setting title ' + self.title)
             else:
-                logging.warning('No title found with selector ' + self.title_selector)
+                logging.warning('No title found with selector ' + self.title_selector +'\nURL: ' + self.url)
         except NoSuchElementException:
-            logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector)
+            logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector +'\nURL: ' + self.url)
             print('FAILED TO SET TITLE NoSuchElementException')
 
     def set_should_discard(self):
         if self._score_title() < SYNONYM_MATCH_THRESHOLD:
-            logging.info('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
+            logging.info('Discarding Title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
             print('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
             self.should_discard = True
         else:
             print('Keeping title: {} with score {}'.format(self.title, self._score_title()))
-            logging.info('Keeping title: {} with score {}'.format(self.title, self._score_title()))
+            logging.info('Keeping title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
 
 
     def _strip_title(self):
@@ -249,7 +252,7 @@ class JobSite(object):
     def _discard_unmatched_job_descriptions(self):
         for index, jd in enumerate(self.job_descriptions):
             if jd.should_discard:
-                logging.info('Adding {title} to discard list'.format(title = jd.title))
+                logging.info('Adding {title} to discard list'.format(title = jd.title) +'\nURL: ' + self.url)
                 self.discarded_job_descriptions.add(self.job_descriptions.pop(index))
 
     def clean(self, links):
@@ -269,7 +272,7 @@ class JobSite(object):
                     summary_dict[key] += value
                     logging.info('Adding key: {k} value total: {v}'.format(k = key, v = summary_dict[key]))
             except KeyError:
-                    logging.warning('KeyError')
+                    logging.warning('KeyError key = "{}"'.format(str(key)))
 
     def _file_results(self):
             output_filename = 'job_output.txt'
@@ -285,6 +288,7 @@ class JobSite(object):
                 for job in self.job_descriptions:
                     if job.title != ' ' and job.title:
                         write_string += '\n\n' + job.title.upper() + '\n'
+                        write_string += '\nURL: ' + job.url + '\n'
                         write_string += '===============================\n'
                         for key, value in job.per_title_match_dict[job.title].items():
                             try:
@@ -302,6 +306,7 @@ class JobSite(object):
         for page in range(0,6):
             if page >=1:
                 self._page(page)
+                logging.info('Paging . . . . . .')
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
                 logging.info('Getting links by tag')
@@ -331,18 +336,18 @@ class JobSite(object):
         pass
 
 def go():
-    logging.info('PROCESSING INDEED')
-    print('PROCESSING INDEED')
-    indeed = JobSite(
-                     url=INDEED_URL,
-                     paging_element_selector = INDEED_PAGING_SELECTOR,
-                     job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector = INDEED_JOB_LINK_SELECTOR,
-                     job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-                     site_id = 'indeed',
-                     title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
-                     )
-    indeed.process_site()
+    # logging.info('PROCESSING INDEED')
+    # print('PROCESSING INDEED')
+    # indeed = JobSite(
+    #                  url=INDEED_URL,
+    #                  paging_element_selector = INDEED_PAGING_SELECTOR,
+    #                  job_link_selector_type = INDEED_JOB_LINK_SELECTOR_TYPE,
+    #                  job_link_selector = INDEED_JOB_LINK_SELECTOR,
+    #                  job_descriptions_title_selector = INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #                  site_id = 'indeed',
+    #                  title_selector_type = INDEED_TITLE_SELECTOR_TYPE,
+    #                  )
+    # indeed.process_site()
     #
     # logging.info('PROCESSING CAREER BUILDER')
     # print('PROCESSING CAREER BUILDER')
