@@ -33,8 +33,7 @@ class JobSite(object):
 
     def go_to_next_page(self):
         try:
-            page_element = self.selenium_driver.find_element_by_xpath(self.next_page_selector.format(self.current_page + 1))
-            self.selenium_driver.get(page_element.get_attribute('href'))
+            self.selenium_driver.get(self.get_next_page_link(formatters=[self.current_page+1]))
         except NoSuchElementException as exc:
             logging.exception(msg='{}, likely reached end of pages.'.format(exc))
             return False
