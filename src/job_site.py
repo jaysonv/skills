@@ -44,10 +44,6 @@ class JobSite(object):
                 self.discarded_job_descriptions.add(job)
         self.job_postings = list(set(self.job_postings) ^ self.discarded_job_descriptions)
 
-    @log_result
-    def filter_links_by_identifier(self, links):
-        return [link for link in links if JOB_DESCRIPTION_IDENTIFIER in link]
-
     def output_results(self):
         with open(JOB_OUTPUT_FILENAME, 'w') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
@@ -63,9 +59,29 @@ class JobSite(object):
 
             logging.info('Writing results to: {output_filename}'.format(output_filename=JOB_OUTPUT_FILENAME))
 
+    @log_result
+    def get_job_post_links(self, solitary_pages=False):
+        """
+        Walk through all pages of a site and collect all job posting links.
+        :param solitary_pages: If True, results will be collected on a per-page basis.
+        If False, all results will be collected at once. Use True if the website goes to
+        a new page when you click on "more results" or a page number, False if the site has
+        "expanding" results behaviour.
+        :return: List of job posting hrefs.
+        """
+        self.go_to_start_page()
+        job_posting_links = []
+        while True:
+            if solitary_pages:
+                job_posting_links.extend(self.get_job_links())
+            if not self.go_to_next_page():
+                break
+        if not solitary_pages:
+            job_posting_links.extend(self.get_job_links())
+        return job_posting_links
+
     def process_site(self):
         self.go_to_start_page()
-
         while True:
             print('Looking on page {}...'.format(self.current_page))
             logging.info('Looking on page {}...'.format(self.current_page))
