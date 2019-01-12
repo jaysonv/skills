@@ -1,6 +1,7 @@
 from job_site import JobSite
 from selenium import webdriver
 import logging
+import signal
 from utility import make_date_string
 
 
@@ -97,6 +98,17 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-    driver.close()
+    def cleanup(*args):
+        driver.quit()
+
+    signal.signal(signal.SIGTERM, cleanup)
+    signal.signal(signal.SIGINT, cleanup)
+    try:
+        main()
+        driver.quit()
+    except Exception as exc:
+        logging.exception(exc)
+        raise exc
+    finally:
+        cleanup()
 
