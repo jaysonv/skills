@@ -12,6 +12,31 @@ def log_result(func):
         return result
     return wrapper
 
+
+def get_hrefs_from_selector(selenium_get_func, *args, **kwargs):
+    @log_result
+    @wraps(selenium_get_func)
+    def wrapper():
+        elements = selenium_get_func(*args, **kwargs)
+        return [element.get_attribute('href') for element in elements]
+    return wrapper
+
+
+def get_link_finder_func(selector_tag_type, selenium_driver, selector, single_link=False):
+    if selector_tag_type == 'tag':
+        if single_link:
+            return get_hrefs_from_selector(selenium_driver.find_element_by_tag_name, selector)
+        return get_hrefs_from_selector(selenium_driver.find_elements_by_tag_name, selector)
+    elif selector_tag_type == 'xpath':
+        if single_link:
+            return get_hrefs_from_selector(selenium_driver.find_element_by_xpath, selector)
+        return get_hrefs_from_selector(selenium_driver.find_elements_by_xpath, selector)
+    elif selector_tag_type == 'css':
+        if single_link:
+            return get_hrefs_from_selector(selenium_driver.find_element_by_css_selector, selector)
+        return get_hrefs_from_selector(selenium_driver.find_elements_by_css_selector, selector)
+
+
 def make_date_string():
     stamp = datetime.now()
     date_string = stamp.strftime('%Y-%d-%m-%H-%M-%S')
