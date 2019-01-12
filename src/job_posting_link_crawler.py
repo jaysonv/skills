@@ -49,7 +49,7 @@ class JobPostingLinkCrawler(object):
             logger.info('Looking on page {}...'.format(self._current_page))
             if self._use_solitary_paging:
                 self.found_links.extend(self._get_job_links_on_page())
-            if not self._go_to_next_page() or i >= 5:
+            if not self._go_to_next_page():
                 break
         if not self._use_solitary_paging:
             self.found_links.extend(self._get_job_links_on_page())
