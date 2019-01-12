@@ -43,23 +43,17 @@ def get_hrefs_from_selector(selenium_get_func, selector):
 
 
 def get_link_finder_func(selector_tag_type, selenium_driver, selector, single_link=False):
-    if selector_tag_type == 'tag':
-        if single_link:
-            return get_href_from_selector(selenium_driver.find_element_by_tag_name, selector)
-        return get_hrefs_from_selector(selenium_driver.find_elements_by_tag_name, selector)
-    elif selector_tag_type == 'xpath':
+    if selector_tag_type == 'xpath':
         if single_link:
             return get_href_from_selector(selenium_driver.find_element_by_xpath, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_xpath, selector)
-    elif selector_tag_type == 'css':
+    if selector_tag_type == 'css':
         if single_link:
             return get_href_from_selector(selenium_driver.find_element_by_css_selector, selector)
         return get_hrefs_from_selector(selenium_driver.find_elements_by_css_selector, selector)
 
 
 def get_element_finder_func(selector_tag_type, selenium_driver, selector):
-    if selector_tag_type == 'tag':
-        return get_element_from_selector(selenium_driver.find_element_by_tag, selector)
     if selector_tag_type == 'xpath':
         return get_element_from_selector(selenium_driver.find_element_by_xpath, selector)
     if selector_tag_type == 'css':
