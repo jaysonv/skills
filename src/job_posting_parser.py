@@ -52,16 +52,15 @@ class JobPostingParser(object):
             site_config['job_posting_description_selector']
         )
 
-    def _discard_unmatched_job_descriptions(self):
-        for job in self.job_postings:
-            if job is None or job.hasNoMatches():
-                logging.info('Adding {title} to discard list'.format(title=job))
-                self.discarded_job_descriptions.add(job)
-        self.job_postings = list(set(self.job_postings) ^ self.discarded_job_descriptions)
+    def start(self, job_posting_links):
+        for link in job_posting_links:
+            self.job_postings.append(self._create_job_posting_from_url(link))
+        self._discard_unmatched_job_descriptions()
+        self.output_results()
+        return self.job_postings
 
     def output_results(self):
-        # TODO
-        with open('', 'w') as file:
+        with open('../job_output.txt', 'w') as file:
             file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
             for job in self.discarded_job_descriptions:
                 file.write('{}\n'.format(job))
@@ -73,8 +72,14 @@ class JobPostingParser(object):
                 print('Keyword matches: {}'.format(job.keyword_matches))
                 print('===============================')
 
-            # TODO
-            logging.info('Writing results to: {output_filename}'.format(output_filename=''))
+            logging.info('Writing results to: {output_filename}'.format(output_filename='../job_output.txt'))
+
+    def _discard_unmatched_job_descriptions(self):
+        for job in self.job_postings:
+            if job is None or job.hasNoMatches():
+                logging.info('Adding {title} to discard list'.format(title=job))
+                self.discarded_job_descriptions.add(job)
+        self.job_postings = list(set(self.job_postings) ^ self.discarded_job_descriptions)
 
     @log_result
     def _create_job_posting_from_url(self, url):
@@ -95,10 +100,3 @@ class JobPostingParser(object):
         except NoSuchElementException as exc:
             logging.exception(msg=exc)
         return None
-
-    def start(self, job_posting_links):
-        for link in job_posting_links:
-            self.job_postings.append(self._create_job_posting_from_url(link))
-        self._discard_unmatched_job_descriptions()
-        self.output_results()
-        return self.job_postings
