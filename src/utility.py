@@ -63,7 +63,7 @@ def get_element_finder_func(selector_tag_type, selenium_driver, selector):
     if selector_tag_type == 'xpath':
         return get_element_from_selector(selenium_driver.find_element_by_xpath, selector)
     if selector_tag_type == 'css':
-        return get_element_from_selector(selenium_driver.find_elements_by_css_selector, selector)
+        return get_element_from_selector(selenium_driver.find_element_by_css_selector, selector)
 
 
 def make_date_string():
