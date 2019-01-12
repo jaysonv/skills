@@ -4,11 +4,14 @@ from datetime import datetime
 
 
 def log_result(func):
+    """
+    :return: A function that logs it's name and resulting return.
+    """
     @wraps(func)
     def wrapper(*args, **kwargs):
         logger = logging.getLogger(func.__name__)
         result = func(*args, **kwargs)
-        logger.info('Result is: {}'.format(result))
+        logger.info('Result with these arguments {}, {} is: {}'.format(args, kwargs, result))
         return result
     return wrapper
 
