@@ -14,7 +14,6 @@ def log_result(func):
 
 
 def get_element_from_selector(selenium_get_func, selector):
-    @log_result
     @wraps(selenium_get_func)
     def wrapper(formatters=None):
         formatters = formatters or []
@@ -23,7 +22,6 @@ def get_element_from_selector(selenium_get_func, selector):
 
 
 def get_href_from_selector(selenium_get_func, selector):
-    @log_result
     @wraps(selenium_get_func)
     def wrapper(formatters=None):
         formatters = formatters or []
