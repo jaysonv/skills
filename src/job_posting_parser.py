@@ -35,6 +35,8 @@ class JobPostingParser(object):
         :param site_configuration:
             * job_posting_title_selector: str
             * job_posting_title_selector_type: str
+            * job_posting_description_selector: str
+            * job_posting_description_selector_type: str
         """
         self.discarded_job_descriptions = set()
         self.job_postings = []
@@ -99,3 +101,4 @@ class JobPostingParser(object):
             self.job_postings.append(self._create_job_posting_from_url(link))
         self._discard_unmatched_job_descriptions()
         self.output_results()
+        return self.job_postings
