@@ -105,10 +105,9 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, cleanup)
     try:
         main()
-        driver.quit()
     except Exception as exc:
         logging.exception(exc)
-        raise exc
+        raise
     finally:
         cleanup()
 
