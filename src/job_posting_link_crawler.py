@@ -1,7 +1,5 @@
 import logging
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-import signal
 from utility import get_link_finder_func, log_result
 
 
