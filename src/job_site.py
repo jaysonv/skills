@@ -86,7 +86,7 @@ class JobSite(object):
             print('Looking on page {}...'.format(self.current_page))
             logging.info('Looking on page {}...'.format(self.current_page))
 
-            links = self.filter_links_by_identifier(self.get_job_links())
+            links = self.get_job_links()
             for link in links:
                 self.job_postings.append(
                     JobDescription.from_url(link, self.selenium_driver, self.job_posting_title_selector))
