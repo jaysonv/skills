@@ -53,6 +53,7 @@ class JobPostingLinkCrawler(object):
                 break
         if not self._use_solitary_paging:
             self.found_links.extend(self._get_job_links_on_page())
+        self._cleanup()
         return self.found_links
 
     def _cleanup(self, *args):
