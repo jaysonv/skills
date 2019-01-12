@@ -5,7 +5,7 @@ from utility import log_result
 
 
 @log_result
-def by_tag_a(selenium_driver, logging_context):
+def by_tag_a(selenium_driver):
     logger = logging.getLogger(name=by_tag_a.__name__)
     links = []
     try:
@@ -17,7 +17,7 @@ def by_tag_a(selenium_driver, logging_context):
 
 
 @log_result
-def by_xpath(selenium_driver, title_selector, logging_context):
+def by_xpath(selenium_driver, title_selector):
     logger = logging.getLogger(name=by_tag_a.__name__)
     links = []
     for index in range(1001):
