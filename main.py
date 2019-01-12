@@ -11,8 +11,8 @@ SYNONYM_MATCH_THRESHOLD = 90
 SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 100, 'sdet': 100, 'test': 70, 'automation': 70, 'engineer': 20}
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
-                     'php', 'sauce', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
-                     'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
+                     'php', 'sauce', 'flask', 'shell', 'nas', 'san', 'iscsi', 'scripts', 'scripting',
+                     'junit', 'selenium', 'react', 'c#', 'testrail', 'confluence', 'jmeter']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
 bigdata_tool = ['hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
@@ -109,7 +109,7 @@ class JobDescription(object):
         for word in parsed_body:
             for key in KEY_WORDS:
                 if word.lower() == key.lower() and word.islower() and key.islower():
-                    logging.info('Found match {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
+                    logging.info('Found match word to keyword {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
                     keydict[key] = 1
                 else:
                     logging.debug('Did not find match {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
@@ -263,7 +263,7 @@ class JobSite(object):
                     summary_dict[key] += value
                     logging.info('Adding key: {k} value total: {v}'.format(k = key, v = summary_dict[key]))
             except KeyError:
-                    logging.warning('KeyError: key of "{}" and title {}'.format(str(key)), str(job.title))
+                    logging.warning('KeyError')
 
     def _file_results(self):
             output_filename = 'job_output.txt'
