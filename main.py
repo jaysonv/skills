@@ -108,7 +108,7 @@ class JobDescription(object):
         print('Matching keywords for ' + self.title)
         for word in parsed_body:
             for key in KEY_WORDS:
-                if word.lower() == key.lower():
+                if word.lower() == key.lower() and word.islower() and key.islower():
                     logging.info('Found match {word} = {keyword}'.format(word = word.lower(), keyword = key.lower()))
                     keydict[key] = 1
                 else:
@@ -131,8 +131,8 @@ class JobDescription(object):
 
             title = element.text.lower()
 
-            if title and (title.islower()):
-                self.title = title
+            if title and (title.islower() or title.isupper()) and title != ' ':
+                self.title = title.lower()
                 logging.info('Setting title ' + self.title)
                 print('Setting title ' + self.title)
             else:
@@ -258,8 +258,11 @@ class JobSite(object):
 
     def _get_totals(self):
         for job in self.job_descriptions:
-            for key, value in job.per_title_match_dict[job.title].items():
-                summary_dict[key] += value
+            try:
+                for key, value in job.per_title_match_dict[job.title].items():
+                    summary_dict[key] += value
+            except KeyError:
+                    logging.warning('KeyError: key of "{}"'.format(str(key)))
 
 
     def _file_results(self):
@@ -283,10 +286,9 @@ class JobSite(object):
                             except KeyError:
                                 logging.warning('KeyError key = ' + key)
                                 write_string += 'KeyError key = ' + key
-
+                file.write(write_string)
                 print(write_string)
                 print('Writing results to file')
-                file.write(write_string)
 
     def process_site(self):
         self.launch_main_page()
