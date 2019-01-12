@@ -69,7 +69,7 @@ SITE_DICT = {
 '''
 
 
-def go():
+def main():
     logging.info('PROCESSING INDEED')
     print('PROCESSING INDEED')
     indeed = JobSite(
@@ -97,6 +97,6 @@ def go():
 
 
 if __name__ == '__main__':
-    go()
+    main()
     driver.close()
 
