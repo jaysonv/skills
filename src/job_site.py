@@ -31,7 +31,7 @@ class JobSite(object):
         self.selenium_driver.get(self.url)
         self.current_page = 1
 
-    def go_to_next_page(self):
+    def _go_to_next_page(self):
         try:
             self.selenium_driver.get(self.get_next_page_link(formatters=[self.current_page+1]))
         except NoSuchElementException as exc:
@@ -80,7 +80,7 @@ class JobSite(object):
             logger.info('Looking on page {}...'.format(self.current_page))
             if solitary_pages:
                 job_posting_links.extend(self.get_job_links_on_page())
-            if not self.go_to_next_page():
+            if not self._go_to_next_page():
                 break
         if not solitary_pages:
             job_posting_links.extend(self.get_job_links_on_page())
