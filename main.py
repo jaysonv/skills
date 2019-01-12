@@ -261,9 +261,9 @@ class JobSite(object):
             try:
                 for key, value in job.per_title_match_dict[job.title].items():
                     summary_dict[key] += value
+                    logging.info('Adding key: {k} value total: {v}'.format(k = key, v = summary_dict[key]))
             except KeyError:
-                    logging.warning('KeyError: key of "{}"'.format(str(key)))
-
+                    logging.warning('KeyError: key of "{}" and title {}'.format(str(key)), str(job.title))
 
     def _file_results(self):
             output_filename = 'job_output.txt'
@@ -373,6 +373,8 @@ summary_string = '\n\n************************************************\n'
 summary_string +='                  SUMMARY'
 summary_string += '\n************************************************\n'
 summary_string += str([(key, value) for key, value in summary_dict.items() if value > 0])
+summary_string += '\n RAW SUMMARY DICT\n'
+summary_string += str(summary_dict)
 
 print(summary_string)
 logging.info(summary_string)
