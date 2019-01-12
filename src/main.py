@@ -1,35 +1,15 @@
-from job_site import JobSite
-from selenium import webdriver
 import logging
+from job_posting_link_crawler import JobPostingLinkCrawler
+from job_posting_parser import JobPostingParser
+from selenium import webdriver
 import signal
 from utility import make_date_string
-
-
-INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '//div[@class="jobsearch-DesktopStickyContainer"]/h3[1]'
-INDEED_JOB_DESCRIPTION_TITLE_SELECTOR_TYPE = ''
-INDEED_URL = 'https://www.indeed.com/jobs?q=software+quality&l=95032'
-INDEED_PAGING_SELECTOR = '//span[.={}]/..'
-INDEED_PAGING_SELECTOR_TYPE = 'xpath'
-INDEED_JOB_LINK_SELECTOR = 'a[class="jobtitle turnstileLink"]'
-INDEED_JOB_LINK_SELECTOR_TYPE = 'css'
-
-
-CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
-CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = '//*[@id="main-content"]/div[10]/div[3]/div[1]/div/div[1]/h1'
-CAREER_BUILDER_PAGING_SELECTOR = '//*[@id="main-content"]/div[7]/div[2]/div[1]/div[2]/div/div/a[{}]'
-CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
-CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
-
-driver = webdriver.Firefox(service_log_path='../logs/geckodriver.log')
-driver.set_window_position(-2000, -2000)
 
 # TODO, logger config
 logging.basicConfig(filename='../logs/execution_{date}.log'.format(date=make_date_string()), level=logging.INFO)
 
 '''
 SITE_DICT = {
-
-
     'dice':
         {
             'url': 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all={title}&for_exact=&for_none=&for_jt=&for_com=&for_loc=Santa+Clara%2C+CA&jtype=Full+Time&sort=relevance&limit=100&radius=50&jtype=Full+Time&limit=100&radius=50&jtype=Full+Time',
@@ -70,33 +50,26 @@ SITE_DICT = {
             },
 '''
 
+driver = webdriver.Firefox(service_log_path='../logs/geckodriver.log')
+
 def main():
+    sites = {'indeed': {
+        'search_start_url': 'https://www.indeed.com/jobs?q=software+quality&l=95032',
+        'next_page_selector': '//span[.={}]/..',
+        'next_page_selector_type': 'xpath',
+        'job_link_selector': 'a[class="jobtitle turnstileLink"]',
+        'job_link_selector_type': 'css',
+        'job_posting_title_selector': 'h3[class$="JobInfoHeader-title"]',
+        'job_posting_title_selector_type': 'css',
+        'job_posting_description_selector': 'div[class^="jobsearch-JobComponent-description"]',
+        'job_posting_description_selector_type': 'css',
+        'use_solitary_paging': True}
+    }
+
     logging.info('PROCESSING INDEED')
     print('PROCESSING INDEED')
-    indeed = JobSite(
-                     selenium_driver=driver,
-                     url=INDEED_URL,
-                     next_page_selector=INDEED_PAGING_SELECTOR,
-                     next_page_selector_type=INDEED_PAGING_SELECTOR_TYPE,
-                     job_link_selector_type=INDEED_JOB_LINK_SELECTOR_TYPE,
-                     job_link_selector=INDEED_JOB_LINK_SELECTOR,
-                     job_posting_title_selector=INDEED_JOB_DESCRIPTION_TITLE_SELECTOR,
-                     )
-    indeed.process_site()
-
-    logging.info('PROCESSING CAREER BUILDER')
-    print('PROCESSING CAREER BUILDER')
-    careerbuilder = JobSite(
-                            selenium_driver=driver,
-                            url=CAREER_BUILDER_URL,
-                            next_page_selector=CAREER_BUILDER_PAGING_SELECTOR,
-                            next_page_selector_type=INDEED_PAGING_SELECTOR_TYPE,
-                            job_link_selector_type=CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE,
-                            job_link_selector=CAREER_BUILDER_JOB_LINK_SELECTOR,
-                            job_posting_title_selector=CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
-                            )
-    careerbuilder.process_site()
-    print('Finished')
+    indeed_links = JobPostingLinkCrawler(driver, **sites['indeed']).start()
+    print(indeed_links)
 
 
 if __name__ == '__main__':
@@ -112,4 +85,3 @@ if __name__ == '__main__':
         raise
     finally:
         cleanup()
-
