@@ -1,36 +1,36 @@
 import logging
 from functools import partial
 from selenium.common.exceptions import NoSuchElementException
+from utility import log_result
 
 
+@log_result
 def by_tag_a(selenium_driver, logging_context):
-    logging_context.info('Getting links by tag...')
+    logger = logging.getLogger(name=by_tag_a.__name__)
     links = []
     try:
-        logging_context.info('Extracting links...')
         elements = [element.get_attribute('href') for element in selenium_driver.find_elements_by_tag_name('a')]
         links.extend(filter(None, elements))
     except NoSuchElementException:
-        logging_context.warning('NoSuchElementException finding job description links')
-    logging_context.debug('Links found : ' + str(links))
+        logger.warning('NoSuchElementException finding job description links')
     return links
 
 
+@log_result
 def by_xpath(selenium_driver, title_selector, logging_context):
-    logging_context.info('Getting links by xpath...')
+    logger = logging.getLogger(name=by_tag_a.__name__)
     links = []
     for index in range(1001):
         formatted_selector = title_selector.format(index)
         try:
-            logging_context.info('Extracting links...')
             elements = selenium_driver.find_elements_by_xpath(formatted_selector)
             links += [element.get_attribute('href') for element in elements]
         except NoSuchElementException as exc:
-            logging_context.exception(msg='{exc}: {selector}'.format(exc=exc, selector=formatted_selector))
-    logging_context.debug('Links found : ' + str(links))
+            logger.exception(msg='{exc}: {selector}'.format(exc=exc, selector=formatted_selector))
     return links
 
 
+@log_result
 def by_class():
     raise NotImplementedError("Job title selection by class not yet implemented")
     # try:
@@ -46,11 +46,10 @@ def by_class():
     #     print('NoSuchElementException')
 
 
-def get_link_func(selector_tag_type, selenium_driver, job_link_selector,
-                  logging_context=logging.getLogger('GetLinkLogger')):
+def get_link_func(selector_tag_type, selenium_driver, job_link_selector):
     if selector_tag_type == 'tag':
-        return partial(by_tag_a, selenium_driver, logging_context)
+        return partial(by_tag_a, selenium_driver)
     elif selector_tag_type == 'xpath':
-        return partial(by_xpath, selenium_driver, job_link_selector, logging_context)
+        return partial(by_xpath, selenium_driver, job_link_selector)
     elif selector_tag_type == 'class':
         raise NotImplementedError("Job title selection by class not yet implemented")
