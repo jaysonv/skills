@@ -11,7 +11,7 @@ SYNONYM_MATCH_THRESHOLD = 90
 SYNONYMS = {'software': 30, 'quality': 80, 'assurance': 90, 'qa': 100, 'sqa': 100, 'sdet': 100, 'test': 70, 'automation': 70, 'engineer': 20}
 
 program_languages = ['bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala', 'firmware'
-                     'php', 'Sauce Labs', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
+                     'php', 'sauce', 'flask', 'shell', 'Telecom', 'NAS', 'SAN', 'iSCSI', 'scripts', 'scripting',
                      'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence', 'JMeter']
 analysis_software = ['tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy', 'plan', 'case',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira', 'functional', 'integration', 'stress', 'load', 'performance']
@@ -25,7 +25,7 @@ other = ['restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy', '.net',
          'django', 'pytest', 'css', 'html', 'appium', 'linux', 'css', 'ui', 'soa', 'unix', 'RESTful', 'Elastic', 'git', 'github', 'database', 'acceptance', 'uat', 'healthcare', 'banking']
 
 KEY_WORDS = program_languages + analysis_software + bigdata_tool + databases + other
-STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'manager', 'lead', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
+STRIP_WORDS = KEY_WORDS + ['senior', 'director', 'enterprise', 'architect', 'manager', 'lead','&', 'mobile', 'sr', 'jr', 'I', 'II', 'III', 'IV', '(', ')', '.', ',', '/', '\\', "\'", '\"', '-', 'analytics']
 for i in range(0,9):
     STRIP_WORDS.append('{}'.format(i))
 
@@ -80,13 +80,7 @@ class JobDescription(object):
         self.title_selector = title_selector
         self.title_selector_type = title_selector_type
 
-    def __str__(self):
-        print_string = '==================================\n'
-        print_string += 'Job Title {job_title}\n'
-        for key, value in self.per_title_match_dict.items():
-            print_string += '{key} : {value}, '.format(job_title = self.title, key = key, value = value)
-
-    def get_job_description(self):
+    def _get_job_description(self):
         driver.get(self.url)
         logging.info('Getting job description at ' + str(self.url))
         print('Getting job description')
@@ -105,7 +99,7 @@ class JobDescription(object):
             logging.warning('No title found in self.title')
 
 
-    def match_keywords(self):
+    def _match_keywords(self):
         keydict = {}
         for key in KEY_WORDS:
             keydict[key.lower()] = 0
@@ -124,7 +118,7 @@ class JobDescription(object):
         else:
             logging.warning('No title found')
 
-    def set_title(self):
+    def _set_title(self):
         try:
             if self.title_selector_type == 'xpath':
                 element = driver.find_element_by_xpath(self.title_selector)
@@ -135,8 +129,10 @@ class JobDescription(object):
             elif self.title_selector_type == 'css_selector':
                 element = driver.find_element_by_css_selector(self.title_selector)
 
-            if element.text:
-                self.title = element.text
+            title = element.text.lower()
+
+            if title and (title.islower()):
+                self.title = title
                 logging.info('Setting title ' + self.title)
                 print('Setting title ' + self.title)
             else:
@@ -199,7 +195,7 @@ class JobSite(object):
     def launch_main_page(self):
         driver.get(self.url)
 
-    def page(self, index):
+    def _page(self, index):
         logging.info('Paging index is ' +str(index))
         try:
             if index >= 1:
@@ -215,7 +211,7 @@ class JobSite(object):
         except ElementClickInterceptedException:
             logging.warning('ElementClickInterceptedException for ' + self.paging_element_selector.format(index))
 
-    def get_links_by_tag_a(self):
+    def _get_links_by_tag_a(self):
         try:
             links = []
             logging.info('Finding link elements')
@@ -230,7 +226,7 @@ class JobSite(object):
             print('NoSuchElementException')
 
 
-    def get_links_by_xpath(self):
+    def _get_links_by_xpath(self):
         links = []
         for index in range(0, 1001):
             try:
@@ -244,7 +240,7 @@ class JobSite(object):
         logging.info('Returning links: ' + str(links))
         return links
 
-    def discard_unmatched_job_descriptions(self):
+    def _discard_unmatched_job_descriptions(self):
         for index, jd in enumerate(self.job_descriptions):
             if jd.should_discard:
                 logging.info('Adding {title} to discard list'.format(title = jd.title))
@@ -260,26 +256,27 @@ class JobSite(object):
         else:
             self.job_descriptions += [JobDescription(link) for link in links]
 
-    def get_totals(self):
+    def _get_totals(self):
         for job in self.job_descriptions:
             for key, value in job.per_title_match_dict[job.title].items():
                 summary_dict[key] += value
 
 
-    def file_results(self):
+    def _file_results(self):
             output_filename = 'job_output.txt'
+            write_string = ''
             with open(output_filename, 'a') as file:
-                write_string = ''
-                write_string += 'DISCARDED JOB DESCRIPTIONS (TOTAL {}) \n'.format(len(self.discarded_job_descriptions)))
+                write_string += '-----------------------------------------------\n'
+                write_string += 'DISCARDED JOB DESCRIPTIONS TOTAL {}) \n'.format(len(self.discarded_job_descriptions))
                 for jd in self.discarded_job_descriptions:
                     write_string += jd.title + '\n'
-                write_string += '\n----------------------------------------------\n'
-                write_string += 'COUNTS FOR MATCHING JOB TITLES (Total {})'.format(len(self.job_descriptions))
-                write_string += '\n----------------------------------------------\n'
+                write_string += '\n-----------------------------------------------\n'
+                write_string += 'KEPT JOB DESCRIPTIONS TOTAL {} \n'.format(len(self.job_descriptions))
+                write_string += '-----------------------------------------------\n'
                 for job in self.job_descriptions:
-                    write_string += '\n\n' + job.title.upper() + '\n'
-                    write_string += '===============================\n'
-                    if job.title != '' and job.title:
+                    if job.title != ' ' and job.title:
+                        write_string += '\n\n' + job.title.upper() + '\n'
+                        write_string += '===============================\n'
                         for key, value in job.per_title_match_dict[job.title].items():
                             try:
                                 write_string += '{key}:{value}, '.format(key=key, value = value)
@@ -296,36 +293,34 @@ class JobSite(object):
 
         for page in range(0,6):
             if page >=1:
-                self.page(page)
+                self._page(page)
             # Get links by selector type
             if self.job_link_selector_type == 'tag':
                 logging.info('Getting links by tag')
-                self.clean(self.get_links_by_tag_a())
+                self.clean(self._get_links_by_tag_a())
             elif self.job_link_selector_type == 'xpath':
                 logging.info('Getting links by xpath')
-                self.clean(self.get_links_by_xpath())
+                self.clean(self._get_links_by_xpath())
             elif self.job_link_selector_type == 'class':
-                self.clean(self.get_links_by_class())
+                self.clean(self._get_links_by_class())
             else:
                 logging.warning('Unknown paging selector type: {}'.format(self.job_link_selector_type ) )
 
             for job_description in self.job_descriptions:
-                job_description.get_job_description()
+                job_description._get_job_description()
                 job_description.title_selector = self.job_descriptions_title_selector
                 job_description.title_selector_type = self.title_selector_type
-                job_description.set_title()
+                job_description._set_title()
                 job_description.set_should_discard()
                 if job_description.should_discard:
-                    self.discard_unmatched_job_descriptions()
+                    self._discard_unmatched_job_descriptions()
                 else:
-                    job_description.match_keywords()
-        self.file_results()
+                    job_description._match_keywords()
+        self._get_totals()
+        self._file_results()
 
-    def get_links_by_class(self):
+    def _get_links_by_class(self):
         pass
-
-
-
 
 def go():
     logging.info('PROCESSING INDEED')
