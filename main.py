@@ -35,7 +35,6 @@ for key in KEY_WORDS:
     summary_dict[key] = 0
 
 
-
 INDEED_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/div[3]/div[3]/div/div/div[1]/div[1]/div[1]/h3'
 INDEED_URL = 'https://www.indeed.com/jobs?as_and=software+quality+assurance+engineer&as_any=&as_not=&as_ttl=&as_cmp=&jt=fulltime&st=&as_src=&salary=%24145%2C000%2B&radius=50&l=95032&fromage=60&limit=50&sort=&psf=advsrch'
 INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
@@ -57,6 +56,13 @@ DICE_PAGING_SELECTOR = '//*[@id="dice_paging_btm"]/ul/li[{}]/a'
 DICE_JOB_LINK_SELECTOR_TYPE = 'xpath'
 DICE_JOB_LINK_SELECTOR = '//*[@id="position{}"]'
 DICE_TITLE_SELECTOR_TYPE = 'xpath'
+
+MONSTER_URL = 'https://www.monster.com/jobs/search/Full-Time_8?q=software-quality-assurance-engineer&rad=60&where=san-jose__2c-ca&tm=30'
+MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/main/div[1]/header/div[2]/h1'
+MONSTER_PAGING_SELECTOR = '//*[@id="loadMoreJobs"]'
+MONSTER_JOB_LINK_SELECTOR_TYPE = 'xpath'
+MONSTER_JOB_LINK_SELECTOR = '/html/body/div[2]/main/div[1]/div[1]/div/div[1]/div/div/section[1]/div/div[2]/header/h2/a'
+MONSTER_TITLE_SELECTOR_TYPE = 'xpath'
 
 
 driver = webdriver.Firefox()
@@ -362,6 +368,18 @@ def go():
     #     title_selector_type=DICE_TITLE_SELECTOR_TYPE,
     # )
     # dice.process_site()
+
+    print('PROCESSING MONSTER')
+    monster = JobSite(
+        url= MONSTER_URL,
+        paging_element_selector=MONSTER_PAGING_SELECTOR,
+        job_link_selector_type=MONSTER_JOB_LINK_SELECTOR_TYPE,
+        job_link_selector=MONSTER_JOB_LINK_SELECTOR,
+        job_descriptions_title_selector=MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR,
+        site_id='monster',
+        title_selector_type=MONSTER_TITLE_SELECTOR_TYPE,
+    )
+    monster.process_site()
 
     print('Finished')
 
