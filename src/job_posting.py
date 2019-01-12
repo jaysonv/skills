@@ -1,5 +1,7 @@
 class JobPosting(object):
-    def __init__(self, url, title, description=None, keyword_matches=None):
+    __slots__ = ('url', 'title', 'description', '_keyword_matches')
+
+    def __init__(self, url, title, description, keyword_matches):
         self.url = url
         self.title = title
         self.description = description
