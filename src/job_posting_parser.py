@@ -30,7 +30,7 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 
 
 class JobPostingParser(object):
-    def __init__(self, selenium_driver, job_posting_links, site_config, job_output_path='../job_output.txt'):
+    def __init__(self, selenium_driver, job_posting_links, site_config):
         """
         :param site_configuration:
             * job_posting_title_selector: str
@@ -58,21 +58,6 @@ class JobPostingParser(object):
         self._discard_unmatched_job_descriptions()
         self.output_results()
         return self.job_postings
-
-    def output_results(self):
-        with open('../job_output.txt', 'w') as file:
-            file.write('DISCARDED JOB DESCRIPTIONS (TOTAL {})\n'.format(len(self.discarded_job_descriptions)))
-            for job in self.discarded_job_descriptions:
-                file.write('{}\n'.format(job))
-
-            print('-----------------------------')
-            print('MATCHING JOB TITLES (TOTAL {})'.format(len(self.job_postings)))
-            for job in self.job_postings:
-                print(job)
-                print('Keyword matches: {}'.format(job.keyword_matches))
-                print('===============================')
-
-            logging.info('Writing results to: {output_filename}'.format(output_filename='../job_output.txt'))
 
     def _discard_unmatched_job_descriptions(self):
         for job in self.job_postings:
