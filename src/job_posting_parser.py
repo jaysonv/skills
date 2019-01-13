@@ -30,7 +30,7 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 
 
 class JobPostingParser(object):
-    def __init__(self, selenium_driver, job_output_path='../job_output.txt', **site_config):
+    def __init__(self, selenium_driver, job_posting_links, site_config, job_output_path='../job_output.txt'):
         """
         :param site_configuration:
             * job_posting_title_selector: str
@@ -42,6 +42,7 @@ class JobPostingParser(object):
         self.job_postings = []
 
         self._selenium_driver = selenium_driver
+        self._job_posting_links = job_posting_links
         self._job_output_path = job_output_path
 
         self._get_job_posting_title_element = get_element_finder_func(
@@ -51,8 +52,8 @@ class JobPostingParser(object):
             selenium_driver, site_config['job_posting_description_selector'],
             site_config['job_posting_description_selector_type'])
 
-    def start(self, job_posting_links):
-        for link in job_posting_links:
+    def start(self):
+        for link in self._job_posting_links:
             self.job_postings.append(self._create_job_posting_from_url(link))
         self._discard_unmatched_job_descriptions()
         self.output_results()
