@@ -5,8 +5,7 @@ from job_posting_parser import JobPostingParser
 import multiprocessing
 from selenium import webdriver
 import signal
-from utility import make_date_string
-
+from site_configurations import SITE_CONFIGURATIONS
 
 def cleanup(driver):
     driver.quit()
@@ -43,36 +42,13 @@ def parse_job_posting_links(*args):
 
 
 def main():
-    sites = {'indeed': {
-            'search_start_url': 'https://www.indeed.com/jobs?q=software+quality&l=95032',
-            'next_page_selector': '//span[.={}]/..',
-            'next_page_selector_type': 'xpath',
-            'job_link_selector': 'a[class="jobtitle turnstileLink"]',
-            'job_link_selector_type': 'css',
-            'job_posting_title_selector': 'h3[class$="JobInfoHeader-title"]',
-            'job_posting_title_selector_type': 'css',
-            'job_posting_description_selector': 'div[class^="jobsearch-JobComponent-description"]',
-            'job_posting_description_selector_type': 'css',
-            'use_solitary_paging': True},
-        'careerbuilder': {
-            'search_start_url': 'https://www.indeed.com/jobs?q=software+quality&l=95032',
-            'next_page_selector': '//span[.={}]/..',
-            'next_page_selector_type': 'xpath',
-            'job_link_selector': 'a[class="jobtitle turnstileLink"]',
-            'job_link_selector_type': 'css',
-            'job_posting_title_selector': 'h3[class$="JobInfoHeader-title"]',
-            'job_posting_title_selector_type': 'css',
-            'job_posting_description_selector': 'div[class^="jobsearch-JobComponent-description"]',
-            'job_posting_description_selector_type': 'css',
-            'use_solitary_paging': True}
-        }
-
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    job_posting_links = pool.map(crawl_site_for_job_links, sites.values())
-    job_postings = pool.starmap(parse_job_posting_links, zip(job_posting_links, sites.values()))
-    job_postings = [item for sublist in job_postings for item in sublist]
-    for job in job_postings:
-        print(job)
+    job_posting_links = pool.map(crawl_site_for_job_links, SITE_CONFIGURATIONS.values())
+    job_postings_per_site = pool.starmap(
+        parse_job_posting_links, zip(job_posting_links, SITE_CONFIGURATIONS.values()))
+    for site_postings in job_postings_per_site:
+        for job in site_postings:
+            print(job)
 
 
 if __name__ == '__main__':
