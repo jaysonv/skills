@@ -1,4 +1,4 @@
-from constants import SITE_CONFIGS_PATH
+from constants import SITE_CONFIGS_PATH, GECKODRIVER_LOG_PATH
 import logging
 from functools import partial
 from job_posting_link_crawler import JobPostingLinkCrawler
@@ -14,7 +14,7 @@ def cleanup(driver):
 
 
 def crawl_site_for_job_links(site_config):
-    driver = webdriver.Firefox()
+    driver = webdriver.Firefox(service_log_path=GECKODRIVER_LOG_PATH)
     signal.signal(signal.SIGTERM, partial(cleanup, driver))
     signal.signal(signal.SIGINT, partial(cleanup, driver))
     try:
@@ -30,7 +30,7 @@ def crawl_site_for_job_links(site_config):
 def parse_job_posting_links(*args):
     posting_links, site_config = args
 
-    driver = webdriver.Firefox()
+    driver = webdriver.Firefox(service_log_path=GECKODRIVER_LOG_PATH)
     signal.signal(signal.SIGTERM, partial(cleanup, driver))
     signal.signal(signal.SIGINT, partial(cleanup, driver))
     try:
