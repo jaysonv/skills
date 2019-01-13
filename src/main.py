@@ -44,7 +44,7 @@ def parse_job_posting_links(*args):
 
 
 def main():
-    logger_path = f'{LOGS_PATH}/execution{utility.make_date_string()}.log'
+    logger_path = f'{LOGS_PATH}/execution{utility.get_logger_date_string()}.log'
     logging.basicConfig(filename=logger_path, level=logging.INFO)
 
     site_configurations = utility.load_all_site_configurations(SITE_CONFIGS_PATH)
