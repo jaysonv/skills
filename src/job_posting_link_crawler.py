@@ -1,6 +1,5 @@
-import logging
 from selenium.common.exceptions import NoSuchElementException
-from utility import get_href_finder_func, log_result
+from utility import get_href_finder_func
 
 
 class JobPostingLinkCrawler(object):
@@ -27,14 +26,11 @@ class JobPostingLinkCrawler(object):
             self._selenium_driver, site_config['next_page_selector'],
             site_config['next_page_selector_type'], single_link=True)
 
-    @log_result
     def start(self):
         """
         Walk through all pages of a site and collect all job posting links.
         """
-        logger = logging.getLogger(__class__.__name__)
         while True:
-            logger.info('Looking on page {}...'.format(self._current_page))
             if self._use_solitary_paging:
                 self.found_links.extend(self._get_job_links_on_page())
             if not self._go_to_next_page():
@@ -46,8 +42,7 @@ class JobPostingLinkCrawler(object):
     def _go_to_next_page(self):
         try:
             self._selenium_driver.get(self._get_next_page_link(formatters=[self._current_page+1]))
-        except NoSuchElementException as exc:
-            logging.exception(msg='{}. Likely reached end of pages.'.format(exc))
+        except NoSuchElementException:
             return False
         self._current_page += 1
         return True
