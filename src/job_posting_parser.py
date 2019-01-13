@@ -33,7 +33,7 @@ KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DAT
 class JobPostingParser(object):
     def __init__(self, selenium_driver, job_posting_links, site_config):
         """
-        :param site_configuration:
+        :param site_config: dict
             * job_posting_title_selector: str
             * job_posting_title_selector_type: str
             * job_posting_description_selector: str
