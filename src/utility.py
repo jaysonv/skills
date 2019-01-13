@@ -1,6 +1,7 @@
+from datetime import datetime
 from functools import wraps
 import logging
-from datetime import datetime
+import yaml
 
 
 def log_result(func):
@@ -75,6 +76,14 @@ def get_element_finder_func(selenium_driver, selector, selector_type):
     if selector_type == 'css':
         return get_element_from_selector(selenium_driver.find_element_by_css_selector, selector)
 
+
+def load_all_site_configurations(path):
+    configs = {}
+    file_names = path.glob('*.yaml')
+    for file_path in file_names:
+        with open(file_path, 'r') as f:
+            configs.update(yaml.load(f))
+    return configs
 
 def make_date_string():
     stamp = datetime.now()

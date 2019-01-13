@@ -5,7 +5,7 @@ from job_posting_parser import JobPostingParser
 import multiprocessing
 from selenium import webdriver
 import signal
-from site_configurations import SITE_CONFIGURATIONS
+import utility
 
 
 def cleanup(driver):
@@ -43,6 +43,9 @@ def parse_job_posting_links(*args):
 
 
 def main():
+    test = utility.load_all_site_configurations()
+    return
+
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     job_posting_links = pool.map(crawl_site_for_job_links, SITE_CONFIGURATIONS.values())
     job_postings_per_site = pool.starmap(
