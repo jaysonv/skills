@@ -6,7 +6,7 @@ from utility import get_href_finder_func, log_result
 class JobPostingLinkCrawler(object):
     def __init__(self, selenium_driver, site_config):
         """
-        :param site_config:
+        :param site_config: dict
             * search_start_url: str
             * next_page_selector: str
             * next_page_selector_type: str
@@ -34,7 +34,6 @@ class JobPostingLinkCrawler(object):
         """
         logger = logging.getLogger(__class__.__name__)
         while True:
-            print('Looking on page {}...'.format(self._current_page))
             logger.info('Looking on page {}...'.format(self._current_page))
             if self._use_solitary_paging:
                 self.found_links.extend(self._get_job_links_on_page())
