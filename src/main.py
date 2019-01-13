@@ -1,4 +1,4 @@
-from constants import SITE_CONFIGS_PATH, GECKODRIVER_LOG_PATH
+from constants import SITE_CONFIGS_PATH, GECKODRIVER_LOG_PATH, LOGS_PATH
 import logging
 from functools import partial
 from job_posting_link_crawler import JobPostingLinkCrawler
@@ -44,6 +44,10 @@ def parse_job_posting_links(*args):
 
 
 def main():
+    logger_path = '{path}/execution{date_string}.log'.format(
+        path=LOGS_PATH, date_string=utility.make_date_string())
+    logging.basicConfig(filename=logger_path, level=logging.INFO)
+
     site_configurations = utility.load_all_site_configurations(SITE_CONFIGS_PATH)
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     job_posting_links = pool.map(crawl_site_for_job_links, site_configurations.values())
