@@ -1,3 +1,6 @@
+import pathlib
+
+
 JOB_TITLES = ('senior quality assurance engineer', 'senior qa engineer ii', 'quality assurance manager',
               'quality assurance engineer iv', 'senior quality assurance engineer', 'sr. director',
               'quality assurance', 'lead quality engineer', 'software quality assurance',
@@ -22,3 +25,7 @@ OTHER_KEYWORDS = ('restassured', 'ios', 'json', 'swift', 'objective-c', 'groovy'
                   'mesos', 'django', 'pytest', 'css', 'html', 'appium')
 
 KEY_WORDS = frozenset(PROGRAM_LANGUAGES + ANALYSIS_SOFTWARE + BIGDATA_TOOL + DATABASE_LANGUAGES + OTHER_KEYWORDS)
+
+SITE_CONFIGS_PATH = pathlib.Path('../site_configs/')
+LOGS_PATH = pathlib.Path('../logs/')
+GECKODRIVER_LOG_PATH = pathlib.Path('../logs/geckodriver.log')
