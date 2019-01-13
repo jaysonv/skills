@@ -7,6 +7,7 @@ from selenium import webdriver
 import signal
 from site_configurations import SITE_CONFIGURATIONS
 
+
 def cleanup(driver):
     driver.quit()
 

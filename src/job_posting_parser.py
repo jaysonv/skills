@@ -1,5 +1,5 @@
 from collections import Counter
-from constants import KEY_WORDS
+from keywords import KEY_WORDS
 from job_posting import JobPosting
 import logging
 from selenium.common.exceptions import NoSuchElementException
