@@ -87,7 +87,7 @@ def load_all_site_configurations(path):
     return configs
 
 
-def make_date_string():
+def get_logger_date_string():
     stamp = datetime.now()
     date_string = stamp.strftime('%Y-%d-%m-%H-%M-%S')
     return date_string
