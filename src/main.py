@@ -1,3 +1,4 @@
+from constants import SITE_CONFIGS_PATH
 import logging
 from functools import partial
 from job_posting_link_crawler import JobPostingLinkCrawler
@@ -43,13 +44,11 @@ def parse_job_posting_links(*args):
 
 
 def main():
-    test = utility.load_all_site_configurations()
-    return
-
+    site_configurations = utility.load_all_site_configurations(SITE_CONFIGS_PATH)
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    job_posting_links = pool.map(crawl_site_for_job_links, SITE_CONFIGURATIONS.values())
+    job_posting_links = pool.map(crawl_site_for_job_links, site_configurations.values())
     job_postings_per_site = pool.starmap(
-        parse_job_posting_links, zip(job_posting_links, SITE_CONFIGURATIONS.values()))
+        parse_job_posting_links, zip(job_posting_links, site_configurations.values()))
     for site_postings in job_postings_per_site:
         for job in site_postings:
             print(job)
