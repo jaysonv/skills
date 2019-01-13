@@ -4,7 +4,7 @@ from utility import get_href_finder_func, log_result
 
 
 class JobPostingLinkCrawler(object):
-    def __init__(self, selenium_driver, **site_config):
+    def __init__(self, selenium_driver, site_config):
         """
         :param site_config:
             * search_start_url: str
