@@ -77,6 +77,7 @@ def get_element_finder_func(selenium_driver, selector, selector_type):
         return get_element_from_selector(selenium_driver.find_element_by_css_selector, selector)
 
 
+@log_result
 def load_all_site_configurations(path):
     configs = {}
     file_names = path.glob('*.yaml')
@@ -84,6 +85,7 @@ def load_all_site_configurations(path):
         with open(file_path, 'r') as f:
             configs.update(yaml.load(f))
     return configs
+
 
 def make_date_string():
     stamp = datetime.now()
