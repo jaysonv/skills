@@ -63,13 +63,16 @@ MONSTER_PAGING_SELECTOR = '//*[@id="loadMoreJobs"]'
 MONSTER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 MONSTER_JOB_LINK_SELECTOR = '/html/body/div[2]/main/div[1]/div[1]/div/div[1]/div/div/section[{}]/div/div[2]/header/h2/a'
 MONSTER_TITLE_SELECTOR_TYPE = 'xpath'
-'''
-/html/body/div[1]/main/div[3]/div[1]/div/section/div[2]/span/p[1]/strong
-/html/body/div[2]/main/div[1]/header/div[2]/h1
-'''
+
+LINKEDIN_URL = 'https://www.linkedin.com/jobs/search?keywords=Software+Quality+Assurance+Engineer&distance=25&locationId=PLACES%2Eus%2E7-1-0-43-18&f_TP=1%2C2%2C3%2C4&f_JT=FULL_TIME&orig=FCTD&trk=jobs_jserp_facet_job_type'
+LINKEDIN_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div/main/div[2]/div/div/div/section[5]/section[1]/div/div[1]/div[2]/div[1]/div[1]/h1'
+LINKEDIN_PAGING_SELECTOR = '/html/body/div/main/div[2]/div/section[4]/div[2]/div/section[6]/div/div/ul/li[{}]/a'
+LINKEDIN_JOB_LINK_SELECTOR_TYPE = 'xpath'
+LINKEDIN_JOB_LINK_SELECTOR = '/html/body/div/main/div[2]/div/section[4]/div[2]/div/section[3]/div/ul/li[{}]/div/div[1]/h2/a'
+LINKEDIN_TITLE_SELECTOR_TYPE = 'xpath'
 
 driver = webdriver.Firefox()
-driver.set_window_position(-2000, -2000)
+#driver.set_window_position(-2000, -2000)
 
 def make_date_string():
     stamp = datetime.now()
@@ -374,17 +377,29 @@ def go():
     # )
     # dice.process_site()
 
-    print('PROCESSING MONSTER')
-    monster = JobSite(
-        url= MONSTER_URL,
-        paging_element_selector=MONSTER_PAGING_SELECTOR,
-        job_link_selector_type=MONSTER_JOB_LINK_SELECTOR_TYPE,
-        job_link_selector=MONSTER_JOB_LINK_SELECTOR,
-        job_descriptions_title_selector=MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR,
+    # print('PROCESSING MONSTER')
+    # monster = JobSite(
+    #     url= MONSTER_URL,
+    #     paging_element_selector=MONSTER_PAGING_SELECTOR,
+    #     job_link_selector_type=MONSTER_JOB_LINK_SELECTOR_TYPE,
+    #     job_link_selector=MONSTER_JOB_LINK_SELECTOR,
+    #     job_descriptions_title_selector=MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR,
+    #     site_id='monster',
+    #     title_selector_type=MONSTER_TITLE_SELECTOR_TYPE,
+    # )
+    # monster.process_site()
+    print('PROCESSING LINKEDIN')
+    driver.get(LINKEDIN_URL)
+    linkedin = JobSite(
+        url= LINKEDIN_URL,
+        paging_element_selector=LINKEDIN_PAGING_SELECTOR,
+        job_link_selector_type=LINKEDIN_JOB_LINK_SELECTOR_TYPE,
+        job_link_selector=LINKEDIN_JOB_LINK_SELECTOR,
+        job_descriptions_title_selector=LINKEDIN_JOB_DESCRIPTION_TITLE_SELECTOR,
         site_id='monster',
-        title_selector_type=MONSTER_TITLE_SELECTOR_TYPE,
+        title_selector_type=LINKEDIN_TITLE_SELECTOR_TYPE,
     )
-    monster.process_site()
+    linkedin.process_site()
 
     print('Finished')
 
