@@ -4,16 +4,17 @@ import logging
 from selenium.common.exceptions import NoSuchElementException
 from utility import log_result, get_element_finder_func
 
-JOB_TITLES = ('Senior Quality Assurance Engineer', 'Senior QA Engineer II', 'Quality Assurance Manager',
-              'Quality Assurance Engineer IV', 'Senior Quality Assurance Engineer', 'Sr. Director, Quality Assurance',
-              'Lead Quality Engineer', 'software quality assurance', 'sqa', 'qa engineer', 'sdet',
-              'software development engineer in test', 'software test engineer', 'software test automation',
-              'qa automation', 'software quality assurance engineer', 'QA Automation Engineer')
+JOB_TITLES = ('senior quality assurance engineer', 'senior qa engineer ii', 'quality assurance manager',
+              'quality assurance engineer iv', 'senior quality assurance engineer', 'sr. director',
+              'quality assurance', 'lead quality engineer', 'software quality assurance',
+              'sqa', 'qa engineer', 'sdet', 'software development engineer in test', 'software test engineer',
+              'software test automation', 'qa automation', 'software quality assurance engineer',
+              'qa automation engineer')
 
 PROGRAM_LANGUAGES = ('bash', 'python', 'java', 'c++', 'ruby', 'perl', 'matlab', 'javascript', 'scala',
-                     'php', 'junit', 'selenium', 'react', 'c#', 'TestRail', 'Confluence')
+                     'php', 'junit', 'selenium', 'react', 'c#', 'testrail', 'confluence')
 
-ANALYSIS_SOFTWARE = ('tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'Jenkins', 'scipy',
+ANALYSIS_SOFTWARE = ('tableau', 'd3.js', 'sas', 'spss', 'd3', 'saas', 'pandas', 'numpy', 'jenkins', 'scipy',
                      'sps', 'spotfire', 'scikits.learn', 'splunk', 'h2o', 'jira')
 
 BIGDATA_TOOL = ('hadoop', 'mapreduce', 'spark', 'pig', 'hive', 'shark', 'oozie', 'zookeeper', 'flume', 'mahout',
@@ -43,7 +44,6 @@ class JobPostingParser(object):
 
         self._selenium_driver = selenium_driver
         self._job_posting_links = job_posting_links
-        self._job_output_path = job_output_path
 
         self._get_job_posting_title_element = get_element_finder_func(
             selenium_driver, site_config['job_posting_title_selector'],
@@ -56,7 +56,6 @@ class JobPostingParser(object):
         for link in self._job_posting_links:
             self.job_postings.append(self._create_job_posting_from_url(link))
         self._discard_unmatched_job_descriptions()
-        self.output_results()
         return self.job_postings
 
     def _discard_unmatched_job_descriptions(self):
@@ -79,7 +78,7 @@ class JobPostingParser(object):
             description = self._get_job_posting_description_element().text
 
             word_counts = Counter(description.split())
-            matching_keywords = {word: count for word, count in word_counts.items() if word in KEY_WORDS}
+            matching_keywords = {word: count for word, count in word_counts.items() if word.lower() in KEY_WORDS}
             logging.info('Matching keywords are: {}'.format(matching_keywords))
             return JobPosting(url, title, description, matching_keywords)
         except NoSuchElementException as exc:
