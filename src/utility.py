@@ -12,7 +12,7 @@ def log_result(func):
     def wrapper(*args, **kwargs):
         logger = logging.getLogger(func.__name__)
         result = func(*args, **kwargs)
-        logger.info('Result with these arguments {}, {} is: {}'.format(args, kwargs, result))
+        logger.info(f'Result with these arguments {args}, {kwargs} is:\n {result}')
         return result
     return wrapper
 

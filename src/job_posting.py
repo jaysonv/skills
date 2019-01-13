@@ -15,5 +15,5 @@ class JobPosting(object):
 
     @property
     def keyword_matches(self):
-        return ', '.join('{k}: {v}'.format(k=word, v=count) for word, count in self._keyword_matches.items())
+        return ', '.join(f'{word}: {count}' for word, count in self._keyword_matches.items())
 
