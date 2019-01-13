@@ -47,7 +47,7 @@ class JobPostingLinkCrawler(object):
         try:
             self._selenium_driver.get(self._get_next_page_link(formatters=[self._current_page+1]))
         except NoSuchElementException as exc:
-            logging.exception(msg='{}, likely reached end of pages.'.format(exc))
+            logging.exception(msg='{}. Likely reached end of pages.'.format(exc))
             return False
         self._current_page += 1
         return True
