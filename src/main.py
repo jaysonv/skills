@@ -7,8 +7,6 @@ from selenium import webdriver
 import signal
 from utility import make_date_string
 
-# TODO, logger config
-logging.basicConfig(filename='../logs/execution_{date}.log'.format(date=make_date_string()), level=logging.INFO)
 
 '''
 SITE_DICT = {
@@ -85,7 +83,6 @@ def parse_job_posting_links(*args):
     finally:
         cleanup(driver)
     return parser.job_postings
-
 
 
 def main():
