@@ -60,6 +60,9 @@ db.sqlite3
 instance/
 .webassets-cache
 
+# Pycharm stuff:
+*.idea/
+
 # Scrapy stuff:
 .scrapy
 
@@ -102,3 +105,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Other
+*.log
