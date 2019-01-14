@@ -46,7 +46,7 @@ driver = webdriver.Firefox()
 LINKEDIN_URL = 'https://www.linkedin.com/jobs/search?keywords=Software+Quality+Assurance+Engineer&distance=25&locationId=PLACES%2Eus%2E7-1-0-43-18&f_TP=1%2C2%2C3%2C4&f_JT=FULL_TIME&orig=FCTD&trk=jobs_jserp_facet_job_type'
 LINKEDIN_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div/main/div[2]/div/div/div/section[5]/section[1]/div/div[1]/div[2]/div[1]/div[1]/h1'
 LINKEDIN_PAGING_SELECTOR = '/html/body/div[5]/div[5]/div[2]/section[1]/div[3]/div/div/div[1]/div[2]/div/section/ol/li/ol/li[{}]/button'
-LINKEDIN_JOB_LINK_SELECTOR = "//*[starts-with[(@id, 'ember')]"
+LINKEDIN_JOB_LINK_SELECTOR = 'job-card-search__link-wrapper js-focusable-card disabled ember-view'
 LINKEDIN_SITE_ID= 'linkedin'
 
 class JobSite(object):
@@ -62,25 +62,50 @@ class JobSite(object):
     def _open_main(self):
         driver.get(self.url)
         logging.info('Opening: "{}""'.format(self.url))
-
+        print('Opening: "{}""'.format(self.url))
     def _page(self):
         try:
             if self.site_id == 'linkedin':
                 for index in range(1,6):
                     driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
+                    print('{} - Paging index: {}, selector "{}"'.format(self.site_id.upper(), index, self.paging_element_selector))
                     logging.info('{} - Paging index: {}, selector "{}"'.format(self.site_id.upper(), index, self.paging_element_selector))
         except NoSuchElementException:
-            logging.info('{} - NoSuchElementException: May be expected with paging\n
-                         Paging index: {}, selector "{}"'.format(self.site_id.upper(), index, self.paging_element_selector))
-        except ElementClickInterceptedException:
-            logging.warning('{} - ElementClickInterceptedException selector: {}'.format(self.site_id.upper(), self.paging_element_selector.format(index))
+            logging.info('{} - NoSuchElementException: May be expected with paging\n' +
+                         'Paging index: {}, selector "{}"'.format(self.site_id.upper(), index, self.paging_element_selector))
 
+            print('{} - NoSuchElementException: May be expected with paging\n' +
+                         'Paging index: {}, selector "{}"'.format(self.site_id.upper(), index, self.paging_element_selector))
+        except ElementClickInterceptedException:
+            logging.warning('{} - ElementClickInterceptedException selector: {}'.format(self.site_id.upper(), self.paging_element_selector.format(index)))
+            print('{} - ElementClickInterceptedException selector: {}'.format(self.site_id.upper(), self.paging_element_selector.format(index)))
     def _get_job_description_links(self):
         links = []
         if self.site_id == 'linkedin':
             try:
-                elements = driver.find_elements_by_xpath(self.job_link_selector)
-                logging.debug('Found elements by xpath = ' + self.job_link_selector)
+                elements = driver.find_elements_by_class_name(self.job_link_selector)
+                logging.debug('{} - Found elements by class = "{}""'.format(self.site_id.upper(), self.job_link_selector))
                 links += [element.get_attribute('href') for element in elements]
             except NoSuchElementException:
                 logging.warning('{} - NoSuchElementException: selector: "{}"'.format(self.site_id.upper(),self.job_link_selector))
+                print('{} - NoSuchElementException: selector: "{}"'.format(self.site_id.upper(),self.job_link_selector))
+            finally:
+                if links:
+                    logging.info('{} - Job Description Links Found: {}'.format(self.site_id.upper(), links))
+                    print('Success, Job Description Links Found')
+                else:
+                    logging.info('{} - No Job Description Links Found'.format(self.site_id.upper()))
+                    print('{} - No Job Description Links Found'.format(self.site_id.upper()))
+
+
+    def go(self):
+        self._open_main()
+        self._get_job_description_links()
+
+linkedin = JobSite(
+                    url = LINKEDIN_URL,
+                    site_id = LINKEDIN_SITE_ID,
+                    paging_element_selector = LINKEDIN_PAGING_SELECTOR,
+                    job_link_selector = LINKEDIN_JOB_LINK_SELECTOR,
+                    )
+linkedin.go()
