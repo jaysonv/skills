@@ -41,6 +41,7 @@ INDEED_PAGING_SELECTOR = '//*[@id="resultsCol"]/div[28]/a[{}]'
 INDEED_JOB_LINK_SELECTOR_TYPE = 'tag'
 INDEED_JOB_LINK_SELECTOR = 'a'
 INDEED_TITLE_SELECTOR_TYPE = 'xpath'
+INDEED_PAGING_TYPE = 'xpath'
 
 CAREER_BUILDER_URL = 'https://www.careerbuilder.com/jobs-software-quality-assurance-engineer-in-95032?keywords=software+quality+assurance+engineer&location=95032&radius=50&emp=jtft%2Cjtfp&pay=120&sort=distance_asc'
 CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR = '.large-push-3 > div:nth-child(1) > div:nth-child(1) > h1:nth-child(1)'
@@ -48,7 +49,7 @@ CAREER_BUILDER_PAGING_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[2]/
 CAREER_BUILDER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 CAREER_BUILDER_JOB_LINK_SELECTOR = '/html/body/div[3]/div[7]/div[2]/div[1]/div[1]/div[2]/div[{}]/div[2]/div[1]/h2[2]/a'
 CAREER_BUILDER_TITLE_SELECTOR_TYPE = 'css_selector'
-
+CAREER_BUILDER_PAGING_TYPE = 'xpath'
 
 DICE_URL = 'https://www.dice.com/jobs/q-Software_QA_Engineer-jtype-Full+Time-l-Santa_Clara%2C_CA-radius-50-jobs'
 DICE_JOB_DESCRIPTION_TITLE_SELECTOR ='//*[@id="jt"]'
@@ -56,6 +57,7 @@ DICE_PAGING_SELECTOR = '//*[@id="dice_paging_btm"]/ul/li[{}]/a'
 DICE_JOB_LINK_SELECTOR_TYPE = 'xpath'
 DICE_JOB_LINK_SELECTOR = '//*[@id="position{}"]'
 DICE_TITLE_SELECTOR_TYPE = 'xpath'
+DICE_PAGING_TYPE = 'xpath'
 
 MONSTER_URL = 'https://www.monster.com/jobs/search/Full-Time_8?q=software-quality-assurance-engineer&rad=60&where=san-jose__2c-ca&tm=30'
 MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div[1]/main/div[1]/header/div[2]/h1'
@@ -63,13 +65,15 @@ MONSTER_PAGING_SELECTOR = '//*[@id="loadMoreJobs"]'
 MONSTER_JOB_LINK_SELECTOR_TYPE = 'xpath'
 MONSTER_JOB_LINK_SELECTOR = '/html/body/div[2]/main/div[1]/div[1]/div/div[1]/div/div/section[{}]/div/div[2]/header/h2/a'
 MONSTER_TITLE_SELECTOR_TYPE = 'xpath'
+MONSTER_PAGING_TYPE = 'xpath'
 
 LINKEDIN_URL = 'https://www.linkedin.com/jobs/search?keywords=Software+Quality+Assurance+Engineer&distance=25&locationId=PLACES%2Eus%2E7-1-0-43-18&f_TP=1%2C2%2C3%2C4&f_JT=FULL_TIME&orig=FCTD&trk=jobs_jserp_facet_job_type'
 LINKEDIN_JOB_DESCRIPTION_TITLE_SELECTOR = '/html/body/div/main/div[2]/div/div/div/section[5]/section[1]/div/div[1]/div[2]/div[1]/div[1]/h1'
-LINKEDIN_PAGING_SELECTOR = '/html/body/div/main/div[2]/div/section[4]/div[2]/div/section[6]/div/div/ul/li[{}]/a'
+LINKEDIN_PAGING_SELECTOR = '/html/body/div[5]/div[5]/div[2]/section[1]/div[3]/div/div/div[1]/div[2]/div/section/ol/li/ol/li[{}]/button'
 LINKEDIN_JOB_LINK_SELECTOR_TYPE = 'xpath'
-LINKEDIN_JOB_LINK_SELECTOR = '/html/body/div/main/div[2]/div/section[4]/div[2]/div/section[3]/div/ul/li[{}]/div/div[1]/h2/a'
+LINKEDIN_JOB_LINK_SELECTOR = "//*[starts-with[(@id, 'ember')]"
 LINKEDIN_TITLE_SELECTOR_TYPE = 'xpath'
+LINKEDIN_PAGING_TYPE = 'linkedin'
 
 driver = webdriver.Firefox()
 #driver.set_window_position(-2000, -2000)
@@ -95,7 +99,7 @@ class JobDescription(object):
     def _get_job_description(self):
         driver.get(self.url)
         logging.info('Getting job description at ' + str(self.url))
-        print('Getting job description')
+        print('Getting job description at ' + str(self.url))
 
     def _parse_body_text(self):
         if self.title:
@@ -134,12 +138,16 @@ class JobDescription(object):
         try:
             if self.title_selector_type == 'xpath':
                 element = driver.find_element_by_xpath(self.title_selector)
+                logging.info('Attempting to set title by xpath = "{}"'.format(self.title_selector))
             elif self.title_selector_type == 'tag':
                 element = driver.find_element_by_tag_name(self.title_selector)
+                logging.info('Attempting to set title by tag = "{}"'.format(self.title_selector))
             elif self.title_selector_type == 'class':
                 element = driver.find_element_by_class(self.title_selector)
+                logging.info('Attempting to set title by class = {}'.format(self.title_selector))
             elif self.title_selector_type == 'css_selector':
                 element = driver.find_element_by_css_selector(self.title_selector)
+                logging.info('Attempting to set title by css selector = {}'.format(self.title_selector))
 
             title = element.text.lower()
 
@@ -151,15 +159,15 @@ class JobDescription(object):
                 logging.warning('No title found with selector ' + self.title_selector +'\nURL: ' + self.url)
         except NoSuchElementException:
             logging.warning('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector +'\nURL: ' + self.url)
-            print('FAILED TO SET TITLE NoSuchElementException')
+            print('FAILED TO SET TITLE NoSuchElementException for selector ' + self.title_selector +'\nURL: ' + self.url)
 
     def set_should_discard(self):
         if self._score_title() < SYNONYM_MATCH_THRESHOLD:
             logging.info('Discarding Title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
-            print('Discarding Title: {} with score {}'.format(self.title, self._score_title()))
+            print('Discarding Title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
             self.should_discard = True
         else:
-            print('Keeping title: {} with score {}'.format(self.title, self._score_title()))
+            print('Keeping title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
             logging.info('Keeping title: {} with score {}'.format(self.title, self._score_title()) +'\nURL: ' + self.url)
 
 
@@ -193,7 +201,7 @@ class JobDescription(object):
 class JobSite(object):
 
     def __init__(self,
-                 url, paging_element_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector, site_id, title_selector_type):
+                 url, paging_element_selector, job_link_selector_type, job_link_selector, job_descriptions_title_selector, site_id, title_selector_type, paging_type):
         self.url = url
         self.discarded_job_descriptions = set()
         self.job_descriptions = []
@@ -203,25 +211,39 @@ class JobSite(object):
         self.job_link_selector = job_link_selector
         self.site_id = site_id
         self.title_selector_type = title_selector_type
+        self.paging_type = paging_type
 
     def launch_main_page(self):
         driver.get(self.url)
 
     def _page(self, index):
-        logging.info('Paging index is ' +str(index))
+        logging.info('Paging index: ' +str(index))
         try:
-            if index >= 1:
+            if self.paging_type == 'xpath' and index >= 1:
                 driver.find_element_by_xpath(self.paging_element_selector.format(index)).click()
                 logging.info('Page by clicking ' + self.paging_element_selector.format(index))
-            else:
-                driver.find_element_by_xpath(self.paging_element_selector).click()
-                logging.info('Page by clicking ' + self.paging_element_selector)
-            print('Paging / clicking "Load More.."')
+                print('Page by clicking ' + self.paging_element_selector.format(index))
+            elif self.paging_type == 'css_selector' and index >= 1:
+                driver.find_element_by_css_selector(self.paging_element_selector).format(index).click()
+                logging.info('Page by clicking ' + self.paging_element_selector + ' index {}'.format(index))
+                print('Page by clicking ' + self.paging_element_selector + ' index {}'.format(index))
+            elif self.paging_type == 'linkedin':
+                elements = driver.find_elements_by_tag_name('button')
+                if elements:
+                    pages_to_click = [element for element in elements if element.text == str(index)]
+                    if pages_to_click:
+                        p = pages_to_click[index - 1]
+                        p.click()
+                        logging.info('Page by clicking button element.text: {}'.format(element.text))
+                        print('Page by clicking button element.text: {}'.format(element.text))
+                    else:
+                        logging.warning('No button to click - which might be okay for paging. Index: {}, element.text: {}'.format(index, element.text))
         except NoSuchElementException:
-            print('NoSuchElementException - which might be expected when paging')
+            print('NoSuchElementException - which might be expected when paging using ' + self.paging_element_selector.format(index))
             logging.warning('NoSuchElementException - which might be expected when paging using ' + self.paging_element_selector.format(index))
         except ElementClickInterceptedException:
             logging.warning('ElementClickInterceptedException for ' + self.paging_element_selector.format(index))
+
 
     def _get_links_by_tag_a(self):
         try:
@@ -240,16 +262,26 @@ class JobSite(object):
 
     def _get_links_by_xpath(self):
         links = []
-        for index in range(0, 1001):
+        if self.site_id == 'linkedin':
             try:
-                elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
-                logging.debug('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
+                elements = driver.find_elements_by_xpath(self.job_link_selector)
+                logging.debug('Found elements by xpath = ' + self.job_link_selector)
                 links += [element.get_attribute('href') for element in elements]
             except NoSuchElementException:
-                logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
-                print('NoSuchElementException')
+                logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector)
+                print('NoSuchElementException getting element by xpath: ' + self.job_link_selector)
 
-        logging.info('Returning links: ' + str(links))
+        else:
+            for index in range(0, 1001):
+                try:
+                    elements = driver.find_elements_by_xpath(self.job_link_selector.format(index))
+                    logging.debug('Found elements by xpath: ' +  self.job_link_selector.format(str(index)))
+                    links += [element.get_attribute('href') for element in elements]
+                except NoSuchElementException:
+                    logging.warning('NoSuchElementException getting element by xpath: ' + self.job_link_selector.format(str(index)))
+                    print('NoSuchElementException')
+        logging.debug('Returning links: ' + str(links))
+        import pdb; pdb.set_trace()
         return links
 
     def _discard_unmatched_job_descriptions(self):
@@ -362,6 +394,7 @@ def go():
     #                         job_descriptions_title_selector = CAREER_BUILDER_JOB_DESCRIPTION_TITLE_SELECTOR,
     #                         site_id = 'careerbuilder',
     #                         title_selector_type = CAREER_BUILDER_TITLE_SELECTOR_TYPE,
+    #                         paging_type = CAREER_BUILDER_PAGING_TYPE,
     # )
     # careerbuilder.process_site()
     # logging.info('PROCESSING DICE')
@@ -374,6 +407,7 @@ def go():
     #     job_descriptions_title_selector=DICE_JOB_DESCRIPTION_TITLE_SELECTOR,
     #     site_id='dice',
     #     title_selector_type=DICE_TITLE_SELECTOR_TYPE,
+    #     paging_type = DICE_PAGING_TYPE,
     # )
     # dice.process_site()
 
@@ -386,18 +420,37 @@ def go():
     #     job_descriptions_title_selector=MONSTER_JOB_DESCRIPTION_TITLE_SELECTOR,
     #     site_id='monster',
     #     title_selector_type=MONSTER_TITLE_SELECTOR_TYPE,
+    #     paging_type = MONSTER_PAGING_TYPE,
     # )
     # monster.process_site()
     print('PROCESSING LINKEDIN')
-    driver.get(LINKEDIN_URL)
+    driver.get('http://linkedin.com')
+    logging.info('Launching root linkedin url')
+    print('Launching root linkedin url')
+    try:
+        element = driver.find_element_by_xpath('//*[@id="login-email"]')
+        element.send_keys('bruce.bookman@gmail.com')
+    except NoSuchElementException:
+        logging.warning('NoSuchElementException: sending keys to login')
+    try:
+        element = driver.find_element_by_xpath('//*[@id="login-password"]')
+        element.send_keys('0rph@nbl@ck0918linkedin')
+    except NoSuchElementException:
+        logging.warning('NoSuchElementException: sending keys to password')
+    try:
+        element = driver.find_element_by_xpath('//*[@id="login-submit"]')
+        element.click()
+    except NoSuchElementException:
+        logging.warning('NoSuchElementException: Clicking login button')
     linkedin = JobSite(
         url= LINKEDIN_URL,
         paging_element_selector=LINKEDIN_PAGING_SELECTOR,
         job_link_selector_type=LINKEDIN_JOB_LINK_SELECTOR_TYPE,
         job_link_selector=LINKEDIN_JOB_LINK_SELECTOR,
         job_descriptions_title_selector=LINKEDIN_JOB_DESCRIPTION_TITLE_SELECTOR,
-        site_id='monster',
+        site_id='linkedin',
         title_selector_type=LINKEDIN_TITLE_SELECTOR_TYPE,
+        paging_type = LINKEDIN_PAGING_TYPE,
     )
     linkedin.process_site()
 
